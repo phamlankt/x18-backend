@@ -4,6 +4,8 @@ const MongoFields = {
     createdAt:"createdAt",
     updatedAt:"updatedAt",
 
+    roleName:"name",
+
     fullName:"fullName",
     username:"username",
     phone:"phone",

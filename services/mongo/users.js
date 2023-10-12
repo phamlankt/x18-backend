@@ -6,14 +6,14 @@ export const user_create = async (data, isHashPassword = true) => {
   const {
     email,
     password,
-    role,
+    roleId,
   } = data;
 
   const userDoc = new UserModel({
     // _id: 0,
     email:email,
     password: isHashPassword ? await hashPassWord(password) : password,
-    role: role,
+    role_id: roleId,
     status: "active",
   });
 
