@@ -10,6 +10,25 @@ const RecruiterSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  phone_number: {
+    type: String,
+    required: false,
+  },
+  address: {
+    type: String,
+    required: false,
+  },
+  sectors: {
+    type: Array,
+    required: false,
+  },
+  decription: {
+    type: String,
+    required: false,
+  },
+}, {
+  timestamps: true,
+  versionKey: false,
 });
 
 

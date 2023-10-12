@@ -5,6 +5,7 @@ import { ResponseFields } from "../globals/fields/response.js";
 import { MongoFields } from "../globals/fields/mongo.js";
 import { comparePassWord } from "../globals/config.js";
 import { jwtSign } from "../globals/jwt.js";
+import { role_getByName } from "../services/mongo/roles.js";
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -60,11 +61,16 @@ const register = async (req, res) => {
     // Tránh trùng email
     if (await user_getByEmail(email)) throw new Error("User exists");
 
+    // Get roleid
+    const r = await role_getByName(role)
+    const roleId=r[MongoFields.id]
+   
+
     //  Create new register object
     const newRegister = await user_create({
       email,
       password,
-      role,
+      roleId,
     });
     delete newRegister[MongoFields.doc].password;
     // 4. Response to client
