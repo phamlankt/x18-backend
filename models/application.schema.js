@@ -15,4 +15,5 @@ const ApplicationSchema = new mongoose.Schema({
   },
 });
 
+
 export default ApplicationSchema;
