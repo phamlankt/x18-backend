@@ -6,6 +6,7 @@ import ApplicationSchema from "../models/application.schema.js";
 import ApplicantSchema from "../models/applicant.schema.js";
 import JobSchema from "../models/job.schema.js";
 import RoleSchema from "../models/role.schema.js";
+import AdminSchema from "../models/admin.schema.js";
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -19,12 +20,26 @@ const connectToDatabase = async () => {
   }
 };
 
-const UserModel = mongoose.model("users",UserSchema)
-const RoleModel = mongoose.model("roles",RoleSchema)
-const RecruiterModel = mongoose.model("recruiters",RecruiterSchema)
-const ApplicantModel = mongoose.model("applicants",ApplicantSchema)
-const JobModel = mongoose.model("jobs",JobSchema)
-const ApplicationModel = mongoose.model("applications",ApplicationSchema)
-const BusinessSectorModel = mongoose.model("business_sectors",BusinessSectorSchema)
+const UserModel = mongoose.model("users", UserSchema);
+const RoleModel = mongoose.model("roles", RoleSchema);
+const RecruiterModel = mongoose.model("recruiters", RecruiterSchema);
+const ApplicantModel = mongoose.model("applicants", ApplicantSchema);
+const AdminModel = mongoose.model("admins", AdminSchema);
+const JobModel = mongoose.model("jobs", JobSchema);
+const ApplicationModel = mongoose.model("applications", ApplicationSchema);
+const BusinessSectorModel = mongoose.model(
+  "business_sectors",
+  BusinessSectorSchema
+);
 
-export {connectToDatabase,UserModel,RoleModel,RecruiterModel,ApplicantModel,JobModel,ApplicationModel,BusinessSectorModel}
+export {
+  connectToDatabase,
+  UserModel,
+  RoleModel,
+  RecruiterModel,
+  ApplicantModel,
+  AdminModel,
+  JobModel,
+  ApplicationModel,
+  BusinessSectorModel,
+};

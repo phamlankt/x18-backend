@@ -15,7 +15,7 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       required: false,
     },
-    role_id: {
+    roleId: {
       type: String,
       required: true,
     },
