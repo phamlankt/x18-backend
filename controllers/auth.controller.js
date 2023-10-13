@@ -1,16 +1,15 @@
 import asyncHandler from "express-async-handler";
 import {
-  user_Recruiter_getById,
   user_create,
+  user_getAllDetailsById,
   user_getByEmail,
-  user_getById,
 } from "../services/mongo/users.js";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { MongoFields } from "../globals/fields/mongo.js";
 import { comparePassWord } from "../globals/config.js";
 import { jwtSign } from "../globals/jwt.js";
-import { role_getById, role_getByName } from "../services/mongo/roles.js";
+import { role_getByName } from "../services/mongo/roles.js";
 import { recruiter_create } from "../services/mongo/recruiters.js";
 import { applicant_create } from "../services/mongo/applicant.js";
 
@@ -77,7 +76,7 @@ const register = async (req, res) => {
       password,
       roleId,
     });
-  
+
     delete newRegister[MongoFields.doc].password;
 
     // Create object in recruiters or applicants collection
@@ -104,13 +103,7 @@ const register = async (req, res) => {
 const getMe = asyncHandler(async (req, res) => {
   const { id } = req.users;
   try {
-    const currentUser = await user_getById(id);
-    const currentRole = await role_getById(currentUser.roleId);
-    if (currentRole.name.includes("recruiter")) {
-      const currentRecruiter = await user_Recruiter_getById(id);
-      console.log("currentRecruiter", currentRecruiter);
-    }
-
+    const currentUser = await user_getAllDetailsById(id);
     res.send(
       RESPONSE(
         {

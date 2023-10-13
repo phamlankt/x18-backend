@@ -33,7 +33,7 @@ export const recruiter_updateByUserId = async (data) => {
 
   const existingUser = await recruiter_getByUserId(userId);
 
-  if (!existingUser) throw new Error("User not already exist");
+  if (!existingUser) throw new Error("User does not exist");
 
   if (companyName) {
     existingUser.companyName = companyName;
