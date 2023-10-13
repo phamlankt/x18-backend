@@ -1,20 +1,19 @@
+import mongoose, { Mongoose } from "mongoose";
 import { hashPassWord, limit } from "../../globals/config.js";
 import { MongoFields } from "../../globals/fields/mongo.js";
-import { UserModel } from "../../globals/mongodb.js";
+import { RecruiterModel, UserModel } from "../../globals/mongodb.js";
 
 export const user_create = async (data, isHashPassword = true) => {
-  const {
-    email,
-    password,
-    roleId,
-  } = data;
+  const { email, password, roleId } = data;
 
   const userDoc = new UserModel({
     // _id: 0,
-    email:email,
+    email: email,
     password: isHashPassword ? await hashPassWord(password) : password,
-    role_id: roleId,
+    is_password_resetting: false,
     status: "active",
+    roleId: roleId,
+    
   });
 
   return await userDoc.save();
@@ -92,6 +91,21 @@ export const user_getByEmail = async (email, isShowPassword = false) => {
 export const user_getById = async (id, isShowPassword = false) => {
   if (isShowPassword) return await UserModel.findOne({ [MongoFields.id]: id });
   return await UserModel.findOne({ [MongoFields.id]: id }).select("-password");
+};
+
+export const user_Recruiter_getById = async (id, isShowPassword = false) => {
+  if (isShowPassword) return await UserModel.findOne({ [MongoFields.id]: id });
+  return await UserModel.aggregate([
+    { $match: { _id: new mongoose.Types.ObjectId(id) } },
+    {
+      $lookup: {
+        from: "recruiters",
+        localField: "userId",
+        foreignField: "_id",
+        as: "recruiters",
+      },
+    },
+  ]);
 };
 
 export const user_getAll = async (isShowPassword = false, cussor = -1) => {
