@@ -7,7 +7,7 @@ export const job_getByQuery = async (query) => {
 
   let queryCondition = { status: { $in: ["open", "extended"] } };
   if (search) {
-    queryCondition.title = { $regex: search.toLowerCase(), $options: "i" };
+    queryCondition.title = { $regex: search, $options: "i" };
   }
   if (sectors) {
     const sectorsArray = sectors
