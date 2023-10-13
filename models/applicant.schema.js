@@ -35,6 +35,10 @@ const ApplicantSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    avatarUrl: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,

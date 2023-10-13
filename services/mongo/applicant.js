@@ -3,8 +3,6 @@ import { hashPassWord, limit } from "../../globals/config.js";
 import { MongoFields } from "../../globals/fields/mongo.js";
 import {
   ApplicantModel,
-  RecruiterModel,
-  UserModel,
 } from "../../globals/mongodb.js";
 
 export const applicant_create = async (data) => {
@@ -50,7 +48,7 @@ export const applicant_updateByUserId = async (data) => {
 
   const existingUser = await applicant_getByUserId(userId);
 
-  if (!existingUser) throw new Error("User not already exist");
+  if (!existingUser) throw new Error("User does not exist");
 
   if (fullName) {
     existingUser.fullName = fullName;
