@@ -1,7 +1,7 @@
 import { JobModel } from "../../globals/mongodb.js";
 
 export const job_getByQuery = async (query) => {
-  const { search, sectors, sortBy, currentPage, pageSize } = query;
+  const { search, sectors, sortBy, sortField, currentPage, pageSize } = query;
 
   const offset = (currentPage - 1) * pageSize;
 
@@ -21,13 +21,14 @@ export const job_getByQuery = async (query) => {
     };
   }
 
-  let sortValue = -1; // default descending order
+  let sortByValue = -1; // default descending order
   if (sortBy === "asc") {
-    sortValue = 1;
+    sortByValue = 1;
   }
+  const sortFieldValue = sortField || "createdAt";
 
   const jobs = await JobModel.find(queryCondition)
-    .sort({ createdAt: sortValue })
+    .sort({ [sortFieldValue]: sortByValue })
     .limit(pageSize)
     .skip(offset);
 
