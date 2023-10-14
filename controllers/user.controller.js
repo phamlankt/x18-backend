@@ -43,7 +43,7 @@ export const profile_updateById = async (req, res) => {
 
 export const user_changePassword = async (req, res) => {
   const { id, currentPassword, password } = req.body;
-  
+
   try {
     if (!currentPassword || !password)
       throw new Error("Missing required fields");
