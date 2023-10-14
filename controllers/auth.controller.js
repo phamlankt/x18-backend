@@ -9,7 +9,7 @@ import { ResponseFields } from "../globals/fields/response.js";
 import { MongoFields } from "../globals/fields/mongo.js";
 import { comparePassWord } from "../globals/config.js";
 import { jwtSign } from "../globals/jwt.js";
-import { role_getByName } from "../services/mongo/roles.js";
+import { role_getById, role_getByName } from "../services/mongo/roles.js";
 import { recruiter_create } from "../services/mongo/recruiters.js";
 import { applicant_create } from "../services/mongo/applicant.js";
 
@@ -33,10 +33,13 @@ const login = asyncHandler(async (req, res) => {
     if (!isMatchPassword) throw new Error("Email or password is not correct!");
 
     // Create JWT Token & Response to client
+    const roleObj = (await role_getById(existingUser.roleId))
+    const roleName = roleObj.name
+    
     const jwtPayload = {
       id: existingUser[MongoFields.id],
       [MongoFields.email]: existingUser[MongoFields.email],
-      role: existingUser[MongoFields.role],
+      roleName: roleName,
     };
     const token = jwtSign(jwtPayload, 60 * 24);
 

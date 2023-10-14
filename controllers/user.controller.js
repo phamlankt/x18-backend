@@ -12,12 +12,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { comparePassWord } from "../globals/config.js";
-
-cloudinary.config({
-  cloud_name: "hypertal",
-  api_key: "128245271721292",
-  api_secret: "z7A4b2fS5Tp0sTuLMkkWAmNqpaU",
-});
+import { uploadStream } from "../middlewares/multer.js";
 
 export const profile_updateById = async (req, res) => {
   const data = req.body;
@@ -70,50 +65,41 @@ export const user_changePassword = async (req, res) => {
   }
 };
 
-export const profile_avatarUpdate = async (data) => {
-  // uploadFile.single("avatar"),
-  async (req, res) => {
-    try {
-      const { id } = req.user;
+export const avatarUpload = async (req, res) => {
+  
+  try {
+    const { id, roleName } = req.users;
+    const src = await uploadStream(req.file.buffer);
+    if (!src) throw new Error("Missing required fields");
+    const updated_info = {
+      userId: id,
+      avatarUrl: src.url,
+    };
+    let result;
+    if (roleName === "recruiter")
+      result = await recruiter_updateByUserId(updated_info);
+    else if (roleName === "applicant")
+      result = await applicant_updateByUserId(updated_info);
+    else if (roleName === "admin")
+      result = await admin_updateByUserId(updated_info);
 
-      // Step 1: add file from client to server
-      const file = req.file;
-
-      // Step 2: upload file to cloudinary => url
-      const result = await cloudinary.uploader.upload(file.path, {
-        resource_type: "auto",
-        folder: "web70-social-app",
-      });
-
-      // Step 3:remove temp image
-      fs.unlinkSync(file.path);
-
-      const avatarUrl = result && result.secure_url;
-
-      //Step 4: url => mongodb
-      const updatedUser = await UserModel.findOneAndUpdate(
-        { _id: id },
+    res.send(
+      RESPONSE(
         {
-          avatar: avatarUrl,
+          [ResponseFields.userInfo]: result,
         },
-        {
-          new: true,
-        }
-      ).select("-password");
-
-      return res.json({
-        message: "Upload avatar successfully",
-        data: updatedUser,
-      });
-    } catch (error) {
-      res.status(500).send(error);
-    }
-  };
+        "Update successful"
+      )
+    );
+  } catch (error) {
+    res.status(500).send(error);
+  }
 };
+
 const UserController = {
   profile_updateById,
-  profile_avatarUpdate,
   user_changePassword,
+  avatarUpload,
 };
 
 export default UserController;
