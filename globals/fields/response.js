@@ -1,5 +1,6 @@
 const ResponseFields = {
     data: "data",
+    accessToken:"accessToken",
     messege: "messege",
     catch: "catch",
     error: "error",
