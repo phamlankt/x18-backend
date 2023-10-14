@@ -28,7 +28,7 @@ const AdminModel = mongoose.model("admins", AdminSchema);
 const JobModel = mongoose.model("jobs", JobSchema);
 const ApplicationModel = mongoose.model("applications", ApplicationSchema);
 const BusinessSectorModel = mongoose.model(
-  "business_sectors",
+  "businessSectors",
   BusinessSectorSchema
 );
 
