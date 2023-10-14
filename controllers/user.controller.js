@@ -3,6 +3,7 @@ import { applicant_updateByUserId } from "../services/mongo/applicant.js";
 import { admin_updateByUserId } from "../services/mongo/admin.js";
 import {
   user_getAllDetailsById,
+  user_getById,
   user_updateById,
 } from "../services/mongo/users.js";
 import fs from "fs";
@@ -10,6 +11,7 @@ import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
+import { comparePassWord } from "../globals/config.js";
 
 cloudinary.config({
   cloud_name: "hypertal",
@@ -25,6 +27,35 @@ export const profile_updateById = async (req, res) => {
     if (roleName === "recruiter") await recruiter_updateByUserId(data);
     else if (roleName === "applicant") await applicant_updateByUserId(data);
     else if (roleName === "admin") await admin_updateByUserId(data);
+    const currentUser = await user_getAllDetailsById(id);
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.userInfo]: currentUser,
+        },
+        "Successfully"
+      )
+    );
+  } catch (e) {
+    res.status(400).send(RESPONSE([], "Unsuccessful", e.errors, e.message));
+  }
+};
+
+export const user_changePassword = async (req, res) => {
+  const { id, currentPassword, password } = req.body;
+  
+  try {
+    if (!currentPassword || !password)
+      throw new Error("Missing required fields");
+    const existingUser = await user_getById(id, true);
+
+    if (!existingUser) throw new Error("Invalid credentials!");
+    const isMatchPassword = await comparePassWord(
+      currentPassword,
+      existingUser.password
+    );
+    if (!isMatchPassword) throw new Error("Current password is not correct!");
+    await user_updateById({ id, currentPassword, password });
     const currentUser = await user_getAllDetailsById(id);
     res.send(
       RESPONSE(
@@ -79,9 +110,10 @@ export const profile_avatarUpdate = async (data) => {
     }
   };
 };
-const ProfileController = {
+const UserController = {
   profile_updateById,
   profile_avatarUpdate,
+  user_changePassword,
 };
 
-export default ProfileController;
+export default UserController;

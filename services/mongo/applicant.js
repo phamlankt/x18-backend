@@ -1,5 +1,3 @@
-import mongoose, { Mongoose } from "mongoose";
-import { hashPassWord, limit } from "../../globals/config.js";
 import { MongoFields } from "../../globals/fields/mongo.js";
 import {
   ApplicantModel,
