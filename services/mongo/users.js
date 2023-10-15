@@ -1,4 +1,3 @@
-import mongoose, { Mongoose } from "mongoose";
 import { hashPassWord, limit } from "../../globals/config.js";
 import { MongoFields } from "../../globals/fields/mongo.js";
 import { UserModel } from "../../globals/mongodb.js";
@@ -11,7 +10,6 @@ export const user_create = async (data, isHashPassword = true) => {
   const { email, password, roleId } = data;
 
   const userDoc = new UserModel({
-    // _id: 0,
     email: email,
     password: isHashPassword ? await hashPassWord(password) : password,
     is_password_resetting: false,
