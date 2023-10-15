@@ -15,6 +15,7 @@ import { comparePassWord } from "../globals/config.js";
 import { uploadStream } from "../middlewares/multer.js";
 
 export const profile_updateById = async (req, res) => {
+  
   const data = req.body;
   const { id, roleName } = req.body;
   try {
