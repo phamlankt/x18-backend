@@ -13,6 +13,7 @@ userRouter.put(
   UserController.profile_updateById
 );
 userRouter.put("/changePassword", UserController.user_changePassword);
+userRouter.put("/resetPassword", UserController.user_resetPassword);
 userRouter.post(
   "/upload-avatar",
   uploadFile.single("avatar"),

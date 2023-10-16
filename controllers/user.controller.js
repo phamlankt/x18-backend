@@ -3,19 +3,18 @@ import { applicant_updateByUserId } from "../services/mongo/applicant.js";
 import { admin_updateByUserId } from "../services/mongo/admin.js";
 import {
   user_getAllDetailsById,
+  user_getByEmail,
   user_getById,
   user_updateById,
 } from "../services/mongo/users.js";
-import fs from "fs";
-// import uploadFile from "../configs/multer.config.js";
-import { v2 as cloudinary } from "cloudinary";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { comparePassWord } from "../globals/config.js";
 import { uploadStream } from "../middlewares/multer.js";
+import { jwtVerify } from "../globals/jwt.js";
+import { MongoFields } from "../globals/fields/mongo.js";
 
 export const profile_updateById = async (req, res) => {
-  
   const data = req.body;
   const { id, roleName } = req.body;
   try {
@@ -66,8 +65,54 @@ export const user_changePassword = async (req, res) => {
   }
 };
 
+export const user_resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+
+  try {
+    if (!token || !password) throw new Error("Missing required fields");
+    // decrypt token, get email from the token and check if that email has is_resetting_password=true
+    const { receivedEmail } = jwtVerify(token);
+
+    const existingUser = await user_getByEmail(receivedEmail, true);
+
+    if (!existingUser) throw new Error("User does not exist!");
+    // check if user with this email requested to change password
+    if (!existingUser.is_password_resetting)
+      throw new Error("User did not request to reset password!");
+
+    const isMatchPassword = await comparePassWord(
+      password,
+      existingUser.password
+    );
+    if (isMatchPassword)
+      throw new Error("New password should  be different from the old one!");
+    await user_updateById({
+      id: existingUser[MongoFields.id],
+      password,
+      is_password_resetting: false,
+    });
+    const currentUser = await user_getAllDetailsById(
+      existingUser[MongoFields.id]
+    );
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.userInfo]: currentUser,
+        },
+        "Successfully"
+      )
+    );
+  } catch (e) {
+    if (e.message === "jwt expired") {
+      return res.status(403).json({
+        message: "Token is expired",
+      });
+    }
+    res.status(400).send(RESPONSE([], "Unsuccessful", e.errors, e.message));
+  }
+};
+
 export const avatarUpload = async (req, res) => {
-  
   try {
     const { id, roleName } = req.users;
     const src = await uploadStream(req.file.buffer);
@@ -100,6 +145,7 @@ export const avatarUpload = async (req, res) => {
 const UserController = {
   profile_updateById,
   user_changePassword,
+  user_resetPassword,
   avatarUpload,
 };
 
