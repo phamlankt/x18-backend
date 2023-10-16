@@ -1,43 +1,31 @@
 import { hashPassWord, limit } from "../../globals/config.js";
 import { MongoFields } from "../../globals/fields/mongo.js";
 import { UserModel } from "../../globals/mongodb.js";
+import { role_getById } from "./roles.js";
+import { recruiter_getByUserId } from "./recruiters.js";
+import { applicant_getByUserId } from "./applicant.js";
+import { admin_getByUserId } from "./admin.js";
 
 export const user_create = async (data, isHashPassword = true) => {
-  const {
-    email,
-    password,
-    roleId,
-  } = data;
+  const { email, password, roleId } = data;
 
   const userDoc = new UserModel({
-    // _id: 0,
-    email:email,
+    email: email,
     password: isHashPassword ? await hashPassWord(password) : password,
-    role_id: roleId,
+    is_password_resetting: false,
     status: "active",
+    roleId: roleId,
   });
 
   return await userDoc.save();
 };
 
 export const user_updateById = async (data) => {
-  const {
-    userId,
-    password,
-    email,
-    fullName,
-    phone,
-    address,
-    active,
-    gender,
-    role_id,
-    status,
-    avatarUrl,
-  } = data;
+  const { id, email, password, is_password_resetting, status, roleId } = data;
 
-  const existingUser = await user_getById(userId, true);
+  const existingUser = await user_getById(id);
 
-  if (!existingUser) throw new Error("User not already exist");
+  if (!existingUser) throw new Error("User does not exist");
 
   if (password) {
     const hashedPassword = await hashPassWord(password);
@@ -48,51 +36,108 @@ export const user_updateById = async (data) => {
     existingUser.email = email;
   }
 
-  if (fullName) {
-    existingUser.fullName = fullName;
-  }
-
-  if (phone) {
-    existingUser.phone = phone;
-  }
-
-  if (address) {
-    existingUser.address = address;
-  }
-
-  if (active != existingUser.active) {
-    existingUser.active = active;
-  }
-
-  if (gender) {
-    existingUser.gender = gender;
-  }
-
-  if (role_id > 1) {
-    existingUser.role_id = role_id;
-  }
+  if (is_password_resetting) {
+    existingUser.is_password_resetting = true;
+  } else existingUser.is_password_resetting = false;
 
   if (status) {
     existingUser.status = status;
   }
-  if (avatarUrl) {
-    existingUser.avatarUrl = avatarUrl;
+
+  if (roleId) {
+    existingUser.roleId = roleId;
   }
 
   return await existingUser.save();
-};
-
-export const user_getByEmail = async (email, isShowPassword = false) => {
-  if (isShowPassword) return await UserModel.findOne({ email: email });
-  return await UserModel.findOne({ [MongoFields.email]: email }).select(
-    "-password"
-  );
 };
 
 export const user_getById = async (id, isShowPassword = false) => {
   if (isShowPassword) return await UserModel.findOne({ [MongoFields.id]: id });
   return await UserModel.findOne({ [MongoFields.id]: id }).select("-password");
 };
+
+export const user_getByEmail = async (email, isShowPassword = false) => {
+  if (isShowPassword)
+    return await UserModel.findOne({ [MongoFields.email]: email });
+  return await UserModel.findOne({ [MongoFields.email]: email }).select(
+    "-password"
+  );
+};
+
+export const user_getAllDetailsById = async (id) => {
+  let currentUser = await user_getById(id);
+  const currentRole = await role_getById(currentUser.roleId);
+  const roleName = currentRole.name;
+  if (currentRole.name.includes("recruiter")) {
+    const currentRecruiter = await recruiter_getByUserId(id);
+    const {
+      companyName,
+      phoneNumber,
+      address,
+      sectors,
+      description,
+      avatarUrl,
+    } = currentRecruiter;
+    currentUser = {
+      ...currentUser[MongoFields.doc],
+      roleName,
+      companyName,
+      phoneNumber,
+      address,
+      sectors,
+      description,
+      avatarUrl,
+    };
+  } else if (currentRole.name.includes("applicant")) {
+    const currentApplicant = await applicant_getByUserId(id);
+    const {
+      fullName,
+      phoneNumber,
+      age,
+      gender,
+      address,
+      sectors,
+      description,
+      avatarUrl,
+    } = currentApplicant;
+    currentUser = {
+      ...currentUser[MongoFields.doc],
+      roleName,
+      fullName,
+      phoneNumber,
+      age,
+      gender,
+      address,
+      sectors,
+      description,
+      avatarUrl,
+    };
+  } else if (currentRole.name.includes("admin")) {
+    const currentAdmin = await admin_getByUserId(id);
+    const { fullName, phoneNumber, avatarUrl } = currentAdmin;
+    currentUser = {
+      ...currentUser[MongoFields.doc],
+      roleName,
+      fullName,
+      phoneNumber,
+      avatarUrl,
+    };
+  }
+  return currentUser;
+};
+// export const user_Recruiter_getById = async (id) => {
+//   return await UserModel.aggregate([
+//     { $match: { _id: new mongoose.Types.ObjectId(id) } },
+//     {
+//       $lookup: {
+//         from: "recruiters",
+//         localField: "userId",
+//         foreignField: "_id",
+//         as: "recruiters",
+//       },
+//     },
+//   ]);
+// };
 
 export const user_getAll = async (isShowPassword = false, cussor = -1) => {
   let query = {};

@@ -1,43 +1,49 @@
 import mongoose from "mongoose";
 
-const ApplicantSchema = new mongoose.Schema({
-  user_id: {
-    type: String,
-    required: true,
-    unique: true,
+const ApplicantSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    fullName: {
+      type: String,
+      required: false,
+    },
+    age: {
+      type: Number,
+      required: false,
+    },
+    gender: {
+      type: String,
+      required: false,
+    },
+    phoneNumber: {
+      type: String,
+      required: false,
+    },
+    address: {
+      type: String,
+      required: false,
+    },
+    sectors: {
+      type: Array,
+      required: false,
+    },
+    description: {
+      type: String,
+      required: false,
+    },
+    avatarUrl: {
+      type: String,
+      required: false,
+    },
   },
-  fullname: {
-    type: String,
-    required: false,
-  },
-  age: {
-    type: Number,
-    required: false,
-  },
-  gender: {
-    type: String,
-    required: false,
-  },
-  phone_number: {
-    type: String,
-    required: false,
-  },
-  address: {
-    type: String,
-    required: false,
-  },
-  sectors: {
-    type: Array,
-    required: false,
-  },
-  decription: {
-    type: String,
-    required: false,
-  },
-}, {
-  timestamps: true,
-  versionKey: false,
-});
-
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
 
 export default ApplicantSchema;

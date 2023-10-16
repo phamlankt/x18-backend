@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
 
 const RecruiterSchema = new mongoose.Schema({
-  user_id: {
+  userId: {
     type: String,
     required: true,
     unique: true,
   },
-  company_name: {
+  companyName: {
     type: String,
     required: false,
   },
-  phone_number: {
+  phoneNumber: {
     type: String,
     required: false,
   },
@@ -22,7 +22,11 @@ const RecruiterSchema = new mongoose.Schema({
     type: Array,
     required: false,
   },
-  decription: {
+  description: {
+    type: String,
+    required: false,
+  },
+  avatarUrl: {
     type: String,
     required: false,
   },

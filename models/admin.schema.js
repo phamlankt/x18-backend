@@ -1,27 +1,23 @@
 import mongoose from "mongoose";
 
-const UserSchema = new mongoose.Schema(
+const AdminSchema = new mongoose.Schema(
   {
-    email: {
+    userId: {
       type: String,
       required: true,
       unique: true,
     },
-    password: {
+    fullName: {
       type: String,
-      required: true,
-    },
-    is_password_resetting: {
-      type: Boolean,
       required: false,
     },
-    roleId: {
+    phoneNumber: {
       type: String,
-      required: true,
+      required: false,
     },
-    status: {
+    avatarUrl: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   {
@@ -30,4 +26,4 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
-export default UserSchema;
+export default AdminSchema;
