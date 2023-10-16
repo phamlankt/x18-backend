@@ -133,11 +133,11 @@ const AUTH = {
     pa: 'pa'
 }
 
-const RESPONSE = (data, messege, ex, error) => {
+const RESPONSE = (data, message, ex, error) => {
 
     const result = {};
     if (data) result[ResponseFields.data] = data;
-    if (messege) result[ResponseFields.messege] = messege;
+    if (message) result[ResponseFields.message] = message;
     if (ex) result[ResponseFields.catch] = ex;
     if (error) result[ResponseFields.error] = error;
 

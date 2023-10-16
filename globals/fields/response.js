@@ -10,6 +10,7 @@ const ResponseFields = {
     businessSectorList:"businessSectorList",
     imageList:"imageList",
     CodeMessage: "CodeMessage",
+    message:"message"
 }
 
 export { ResponseFields };

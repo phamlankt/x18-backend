@@ -37,8 +37,8 @@ export const user_updateById = async (data) => {
   }
 
   if (is_password_resetting) {
-    existingUser.is_password_resetting = is_password_resetting;
-  }
+    existingUser.is_password_resetting = true;
+  } else existingUser.is_password_resetting = false;
 
   if (status) {
     existingUser.status = status;
@@ -124,7 +124,6 @@ export const user_getAllDetailsById = async (id) => {
     };
   }
   return currentUser;
-  
 };
 // export const user_Recruiter_getById = async (id) => {
 //   return await UserModel.aggregate([
