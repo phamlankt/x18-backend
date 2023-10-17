@@ -1,5 +1,5 @@
 import express from "express";
-
+import { jwtCheck } from "../middlewares/jwt.js";
 import JobController from "../controllers/job.controller.js";
 import { checkQuery } from "../middlewares/checkQuery.middleware.js";
 
@@ -15,7 +15,8 @@ const queryParams = [
   "location",
 ];
 
-jobRouter.get("/all", JobController.getAll);
+jobRouter.get("/", jwtCheck, JobController.getAll);
 jobRouter.get("/query", checkQuery(queryParams), JobController.getByQuery);
+jobRouter.get("/active", jwtCheck, JobController.getActiveJobs);
 
 export default jobRouter;

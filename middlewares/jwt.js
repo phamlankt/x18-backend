@@ -13,6 +13,7 @@ const jwtCheck = (req, res, next) => {
   try {
     const decoded = jwtVerify(token);
     req.users = decoded;
+    users.roleName = decoded.roleName;
     next();
   } catch (error) {
     if (error.message === "jwt expired") {
