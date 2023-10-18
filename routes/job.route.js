@@ -5,7 +5,7 @@ import { checkQuery } from "../middlewares/checkQuery.middleware.js";
 
 const jobRouter = express.Router();
 
-const queryParams = [
+const acceptedQueryParams = [
   "search",
   "sectors",
   "sortBy",
@@ -16,6 +16,10 @@ const queryParams = [
 ];
 
 jobRouter.get("/all", JobController.getAll);
-jobRouter.get("/query", checkQuery(queryParams), JobController.getByQuery);
+jobRouter.get(
+  "/query",
+  checkQuery(acceptedQueryParams),
+  JobController.getBySearchAndFilter
+);
 
 export default jobRouter;
