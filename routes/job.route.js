@@ -1,7 +1,9 @@
 import express from "express";
-
 import JobController from "../controllers/job.controller.js";
 import { checkQuery } from "../middlewares/checkQuery.middleware.js";
+import { jobSchema } from "../validations/job.validation.js";
+import { validationMdw } from "../middlewares/validate.middleware.js";
+import { jwtCheck } from "../middlewares/jwt.js";
 
 const jobRouter = express.Router();
 
@@ -16,7 +18,7 @@ const acceptedQueryParams = [
 ];
 
 jobRouter.get("/all", JobController.getAll);
-jobRouter.post("/", JobController.create);
+jobRouter.post("/",validationMdw(jobSchema),jwtCheck, JobController.create);
 jobRouter.get(
   "/query",
   checkQuery(acceptedQueryParams),

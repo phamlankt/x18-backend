@@ -62,3 +62,35 @@ export const getActiveJobByQuery = async (query) => {
 
   return { jobs, pagination };
 };
+
+export const jobCreate = async (data) => {
+  const {
+    title,
+    deadline,
+    creator,
+    sectors,
+    salary,
+    location,
+    city,
+    position,
+    amount,
+    description,
+    status,
+  } = data;
+
+  const jobDoc = new JobModel({
+    title: title,
+    deadline: deadline,
+    creator: creator,
+    sectors: sectors,
+    salary: salary,
+    location: location,
+    city: city,
+    position: position,
+    amount: amount,
+    description: description,
+    status: status,
+  });
+
+  return await jobDoc.save();
+};
