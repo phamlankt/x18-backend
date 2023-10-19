@@ -11,7 +11,8 @@ const ResponseFields = {
     imageList:"imageList",
     CodeMessage: "CodeMessage",
     message:"message",
-    applicationList: "applicationList"
+    applicationList: "applicationList",
+    jobList: "jobList",
 }
 
 export { ResponseFields };
