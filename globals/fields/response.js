@@ -7,6 +7,7 @@ const ResponseFields = {
     cussor: "cussor",
     did: "Did",
     userInfo: "userInfo",
+    jobInfo: "jobInfo",
     businessSectorList:"businessSectorList",
     imageList:"imageList",
     CodeMessage: "CodeMessage",
