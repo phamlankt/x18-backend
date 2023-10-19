@@ -3,7 +3,7 @@ import { hashPassWord, limit } from "../../globals/config.js";
 import { MongoFields } from "../../globals/fields/mongo.js";
 import { RecruiterModel, UserModel } from "../../globals/mongodb.js";
 
-export const recruiter_create = async (data) => {
+export const recruiterCreate = async (data) => {
   const { userId, companyName, phoneNumber, address, sectors, description,avatarUrl } =
     data;
 
@@ -20,7 +20,7 @@ export const recruiter_create = async (data) => {
   return await userDoc.save();
 };
 
-export const recruiter_updateByUserId = async (data) => {
+export const recruiterUpdateByUserId = async (data) => {
   const {
     userId,
     companyName,
@@ -31,7 +31,7 @@ export const recruiter_updateByUserId = async (data) => {
     avatarUrl,
   } = data;
 
-  const existingUser = await recruiter_getByUserId(userId);
+  const existingUser = await recruiterGetByUserId(userId);
 
   if (!existingUser) throw new Error("User does not exist");
 
@@ -64,6 +64,6 @@ export const recruiter_updateByUserId = async (data) => {
   return await existingUser.save();
 };
 
-export const recruiter_getByUserId = async (userId) => {
+export const recruiterGetByUserId = async (userId) => {
   return await RecruiterModel.findOne({ [MongoFields.userId]: userId });
 };

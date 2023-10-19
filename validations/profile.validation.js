@@ -1,9 +1,9 @@
 import * as Yup from "yup";
-import { businessSector_getAll } from "../services/mongo/businessSectors.js";
+import { businessSectorGetAll } from "../services/mongo/businessSectors.js";
 
 let businessSectors = [];
 async function getBusinessSectos() {
-  const result = await businessSector_getAll();
+  const result = await businessSectorGetAll();
   result.map((bs) => businessSectors.push(bs.name));
 }
 getBusinessSectos();

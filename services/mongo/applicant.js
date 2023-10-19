@@ -3,7 +3,7 @@ import {
   ApplicantModel,
 } from "../../globals/mongodb.js";
 
-export const applicant_create = async (data) => {
+export const applicantCreate = async (data) => {
   const {
     userId,
     fullName,
@@ -31,7 +31,7 @@ export const applicant_create = async (data) => {
   return await userDoc.save();
 };
 
-export const applicant_updateByUserId = async (data) => {
+export const applicantUpdateByUserId = async (data) => {
   const {
     userId,
     fullName,
@@ -44,7 +44,7 @@ export const applicant_updateByUserId = async (data) => {
     avatarUrl,
   } = data;
 
-  const existingUser = await applicant_getByUserId(userId);
+  const existingUser = await applicantGetByUserId(userId);
 
   if (!existingUser) throw new Error("User does not exist");
 
@@ -83,6 +83,6 @@ export const applicant_updateByUserId = async (data) => {
   return await existingUser.save();
 };
 
-export const applicant_getByUserId = async (userId) => {
+export const applicantGetByUserId = async (userId) => {
   return await ApplicantModel.findOne({ [MongoFields.userId]: userId });
 };

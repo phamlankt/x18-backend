@@ -10,10 +10,10 @@ userRouter.put(
   "/update",
   jwtCheck,
   validationProfileMdw(),
-  UserController.profile_updateById
+  UserController.profileUpdateById
 );
-userRouter.put("/changePassword", UserController.user_changePassword);
-userRouter.put("/resetPassword", UserController.user_resetPassword);
+userRouter.put("/changePassword", UserController.userChangePassword);
+userRouter.put("/resetPassword", UserController.userResetPassword);
 userRouter.post(
   "/upload-avatar",
   uploadFile.single("avatar"),

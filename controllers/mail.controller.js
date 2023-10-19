@@ -2,7 +2,7 @@ import { RESPONSE } from "../globals/api.js";
 import { env } from "../globals/config.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import nodemailer from "nodemailer";
-import { user_getByEmail, user_updateById } from "../services/mongo/users.js";
+import { userGetByEmail, userUpdateById } from "../services/mongo/users.js";
 import { jwtSign } from "../globals/jwt.js";
 import { MongoFields } from "../globals/fields/mongo.js";
 
@@ -15,7 +15,7 @@ export const send = async (req, res) => {
     },
   });
   const { email } = req.body;
-  const requestedUser = await user_getByEmail(email);
+  const requestedUser = await userGetByEmail(email);
   if (!requestedUser)
     res.status(400).send(RESPONSE([], "Email does not exist!"));
   // throw new Error("Email does not exist!");
@@ -39,7 +39,7 @@ export const send = async (req, res) => {
             .send(RESPONSE([], "Unsuccessful", e.errors, e.message));
         } else {
           // set is_resetting_password=true
-          await user_updateById({
+          await userUpdateById({
             id: requestedUser[MongoFields.id],
             is_password_resetting: true,
           });

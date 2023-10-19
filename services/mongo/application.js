@@ -1,6 +1,6 @@
 import { ApplicationModel } from "../../globals/mongodb.js";
 
-export const application_getAll = async (req) => {
+export const applicationGetAll = async (req) => {
   const { id, roleName } = req.users;
   if (roleName !== "applicant")
     throw new Error("You must be an applicant to access this page.");
