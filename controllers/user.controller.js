@@ -1,11 +1,11 @@
-import { recruiter_updateByUserId } from "../services/mongo/recruiters.js";
-import { applicant_updateByUserId } from "../services/mongo/applicant.js";
-import { admin_updateByUserId } from "../services/mongo/admin.js";
+import { recruiterUpdateByUserId } from "../services/mongo/recruiters.js";
+import { applicantUpdateByUserId } from "../services/mongo/applicant.js";
+import { adminUpdateByUserId } from "../services/mongo/admin.js";
 import {
-  user_getAllDetailsById,
-  user_getByEmail,
-  user_getById,
-  user_updateById,
+  userGetAllDetailsById,
+  userGetByEmail,
+  userGetById,
+  userUpdateById,
 } from "../services/mongo/users.js";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
@@ -14,15 +14,15 @@ import { uploadStream } from "../middlewares/multer.js";
 import { jwtVerify } from "../globals/jwt.js";
 import { MongoFields } from "../globals/fields/mongo.js";
 
-export const profile_updateById = async (req, res) => {
+export const profileUpdateById = async (req, res) => {
   const data = req.body;
   const { id, roleName } = req.body;
   try {
-    await user_updateById(data);
-    if (roleName === "recruiter") await recruiter_updateByUserId(data);
-    else if (roleName === "applicant") await applicant_updateByUserId(data);
-    else if (roleName === "admin") await admin_updateByUserId(data);
-    const currentUser = await user_getAllDetailsById(id);
+    await userUpdateById(data);
+    if (roleName === "recruiter") await recruiterUpdateByUserId(data);
+    else if (roleName === "applicant") await applicantUpdateByUserId(data);
+    else if (roleName === "admin") await adminUpdateByUserId(data);
+    const currentUser = await userGetAllDetailsById(id);
     res.send(
       RESPONSE(
         {
@@ -36,13 +36,13 @@ export const profile_updateById = async (req, res) => {
   }
 };
 
-export const user_changePassword = async (req, res) => {
+export const userChangePassword = async (req, res) => {
   const { id, currentPassword, password } = req.body;
 
   try {
     if (!currentPassword || !password)
       throw new Error("Missing required fields");
-    const existingUser = await user_getById(id, true);
+    const existingUser = await userGetById(id, true);
 
     if (!existingUser) throw new Error("Invalid credentials!");
     const isMatchPassword = await comparePassWord(
@@ -50,8 +50,8 @@ export const user_changePassword = async (req, res) => {
       existingUser.password
     );
     if (!isMatchPassword) throw new Error("Current password is not correct!");
-    await user_updateById({ id, currentPassword, password });
-    const currentUser = await user_getAllDetailsById(id);
+    await userUpdateById({ id, currentPassword, password });
+    const currentUser = await userGetAllDetailsById(id);
     res.send(
       RESPONSE(
         {
@@ -65,7 +65,7 @@ export const user_changePassword = async (req, res) => {
   }
 };
 
-export const user_resetPassword = async (req, res) => {
+export const userResetPassword = async (req, res) => {
   const { token, password } = req.body;
 
   try {
@@ -73,7 +73,7 @@ export const user_resetPassword = async (req, res) => {
     // decrypt token, get email from the token and check if that email has is_resetting_password=true
     const { receivedEmail } = jwtVerify(token);
 
-    const existingUser = await user_getByEmail(receivedEmail, true);
+    const existingUser = await userGetByEmail(receivedEmail, true);
 
     if (!existingUser) throw new Error("User does not exist!");
     // check if user with this email requested to change password
@@ -86,12 +86,12 @@ export const user_resetPassword = async (req, res) => {
     );
     if (isMatchPassword)
       throw new Error("New password should  be different from the old one!");
-    await user_updateById({
+    await userUpdateById({
       id: existingUser[MongoFields.id],
       password,
       is_password_resetting: false,
     });
-    const currentUser = await user_getAllDetailsById(
+    const currentUser = await userGetAllDetailsById(
       existingUser[MongoFields.id]
     );
     res.send(
@@ -123,11 +123,11 @@ export const avatarUpload = async (req, res) => {
     };
     let result;
     if (roleName === "recruiter")
-      result = await recruiter_updateByUserId(updated_info);
+      result = await recruiterUpdateByUserId(updated_info);
     else if (roleName === "applicant")
-      result = await applicant_updateByUserId(updated_info);
+      result = await applicantUpdateByUserId(updated_info);
     else if (roleName === "admin")
-      result = await admin_updateByUserId(updated_info);
+      result = await adminUpdateByUserId(updated_info);
 
     res.send(
       RESPONSE(
@@ -143,9 +143,9 @@ export const avatarUpload = async (req, res) => {
 };
 
 const UserController = {
-  profile_updateById,
-  user_changePassword,
-  user_resetPassword,
+  profileUpdateById,
+  userChangePassword,
+  userResetPassword,
   avatarUpload,
 };
 

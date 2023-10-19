@@ -1,12 +1,12 @@
 import { hashPassWord, limit } from "../../globals/config.js";
 import { MongoFields } from "../../globals/fields/mongo.js";
 import { UserModel } from "../../globals/mongodb.js";
-import { role_getById } from "./roles.js";
-import { recruiter_getByUserId } from "./recruiters.js";
-import { applicant_getByUserId } from "./applicant.js";
-import { admin_getByUserId } from "./admin.js";
+import { roleGetById } from "./roles.js";
+import { recruiterGetByUserId } from "./recruiters.js";
+import { applicantGetByUserId } from "./applicant.js";
+import { adminGetByUserId } from "./admin.js";
 
-export const user_create = async (data, isHashPassword = true) => {
+export const userCreate = async (data, isHashPassword = true) => {
   const { email, password, roleId } = data;
 
   const userDoc = new UserModel({
@@ -20,10 +20,10 @@ export const user_create = async (data, isHashPassword = true) => {
   return await userDoc.save();
 };
 
-export const user_updateById = async (data) => {
+export const userUpdateById = async (data) => {
   const { id, email, password, is_password_resetting, status, roleId } = data;
 
-  const existingUser = await user_getById(id);
+  const existingUser = await userGetById(id);
 
   if (!existingUser) throw new Error("User does not exist");
 
@@ -51,12 +51,12 @@ export const user_updateById = async (data) => {
   return await existingUser.save();
 };
 
-export const user_getById = async (id, isShowPassword = false) => {
+export const userGetById = async (id, isShowPassword = false) => {
   if (isShowPassword) return await UserModel.findOne({ [MongoFields.id]: id });
   return await UserModel.findOne({ [MongoFields.id]: id }).select("-password");
 };
 
-export const user_getByEmail = async (email, isShowPassword = false) => {
+export const userGetByEmail = async (email, isShowPassword = false) => {
   if (isShowPassword)
     return await UserModel.findOne({ [MongoFields.email]: email });
   return await UserModel.findOne({ [MongoFields.email]: email }).select(
@@ -64,12 +64,15 @@ export const user_getByEmail = async (email, isShowPassword = false) => {
   );
 };
 
-export const user_getAllDetailsById = async (id) => {
-  let currentUser = await user_getById(id);
-  const currentRole = await role_getById(currentUser.roleId);
+export const userGetAllDetailsById = async (id) => {
+  let currentUser = await userGetById(id);
+  if (!currentUser) throw new Error("User does not exist");
+  const currentRole = await roleGetById(currentUser.roleId);
+  if (!currentRole) throw new Error("Role does not exist");
   const roleName = currentRole.name;
   if (currentRole.name.includes("recruiter")) {
-    const currentRecruiter = await recruiter_getByUserId(id);
+    const currentRecruiter = await recruiterGetByUserId(id);
+    if (!currentRecruiter) throw new Error("Recruiter does not exist");
     const {
       companyName,
       phoneNumber,
@@ -89,7 +92,8 @@ export const user_getAllDetailsById = async (id) => {
       avatarUrl,
     };
   } else if (currentRole.name.includes("applicant")) {
-    const currentApplicant = await applicant_getByUserId(id);
+    const currentApplicant = await applicantGetByUserId(id);
+    if (!currentApplicant) throw new Error("Applicant does not exist");
     const {
       fullName,
       phoneNumber,
@@ -113,7 +117,8 @@ export const user_getAllDetailsById = async (id) => {
       avatarUrl,
     };
   } else if (currentRole.name.includes("admin")) {
-    const currentAdmin = await admin_getByUserId(id);
+    const currentAdmin = await adminGetByUserId(id);
+    if (!currentAdmin) throw new Error("Admin does not exist");
     const { fullName, phoneNumber, avatarUrl } = currentAdmin;
     currentUser = {
       ...currentUser[MongoFields.doc],
@@ -125,47 +130,9 @@ export const user_getAllDetailsById = async (id) => {
   }
   return currentUser;
 };
-// export const user_Recruiter_getById = async (id) => {
-//   return await UserModel.aggregate([
-//     { $match: { _id: new mongoose.Types.ObjectId(id) } },
-//     {
-//       $lookup: {
-//         from: "recruiters",
-//         localField: "userId",
-//         foreignField: "_id",
-//         as: "recruiters",
-//       },
-//     },
-//   ]);
-// };
 
-export const user_getAll = async (isShowPassword = false, cussor = -1) => {
+export const userGetAll = async (isShowPassword = false, cussor = -1) => {
   let query = {};
-
-  if (cussor > 0) {
-    query[MongoFields.id] = { $lte: cussor };
-  }
-
-  if (isShowPassword)
-    return await UserModel.find(query)
-      .sort({ [MongoFields.id]: -1 })
-      .limit(limit);
-  return await UserModel.find(query)
-    .sort({ [MongoFields.id]: -1 })
-    .limit(limit)
-    .select("-password");
-};
-
-export const user_getAllByKiot = async (
-  kiotId = -1,
-  isShowPassword = false,
-  cussor = -1
-) => {
-  let query = {};
-
-  if (Boolean(kiotId) && kiotId > 0) {
-    query[MongoFields.kiot_id] = kiotId;
-  }
 
   if (cussor > 0) {
     query[MongoFields.id] = { $lte: cussor };

@@ -52,7 +52,7 @@ const API = {
     user_id: `${users}/:id`,
     user_update: `${users}`,
     user_delete: `${users}`,
-    user_create: `${users}/create`,
+    userCreate: `${users}/create`,
 
     kiots: `${kiots}`,
     kiot_Id: `${kiots}/:id`,
@@ -93,7 +93,7 @@ const METHOD = {
     user_id: 'GET',
     user_update: 'POST',
     user_delete: 'POST',
-    user_create: 'POST',
+    userCreate: 'POST',
 
     kiots: 'GET',
     kiot_Id: 'GET',

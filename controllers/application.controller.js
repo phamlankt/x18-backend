@@ -1,12 +1,12 @@
 import asyncHandler from "express-async-handler";
-import { application_getAll } from "../services/mongo/application.js";
+import { applicationGetAll } from "../services/mongo/application.js";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
 
 // Get all  applications
 const getAll = asyncHandler(async (req, res) => {
   try {
-    const applications = await application_getAll(req);
+    const applications = await applicationGetAll(req);
     res.send(
       RESPONSE(
         {

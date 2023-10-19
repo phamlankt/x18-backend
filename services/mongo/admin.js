@@ -1,9 +1,7 @@
-import mongoose, { Mongoose } from "mongoose";
-import { hashPassWord, limit } from "../../globals/config.js";
 import { MongoFields } from "../../globals/fields/mongo.js";
 import { AdminModel, UserModel } from "../../globals/mongodb.js";
 
-export const admin_create = async (data) => {
+export const adminCreate = async (data) => {
   const { userId, fullName, phoneNumber,avatarUrl } = data;
 
   const userDoc = new AdminModel({
@@ -16,10 +14,10 @@ export const admin_create = async (data) => {
   return await userDoc.save();
 };
 
-export const admin_updateByUserId = async (data) => {
+export const adminUpdateByUserId = async (data) => {
   const { userId, fullName, phoneNumber, avatarUrl } = data;
 
-  const existingUser = await admin_getByUserId(userId);
+  const existingUser = await adminGetByUserId(userId);
 
   if (!existingUser) throw new Error("User not already exist");
 
@@ -38,6 +36,6 @@ export const admin_updateByUserId = async (data) => {
   return await existingUser.save();
 };
 
-export const admin_getByUserId = async (userId) => {
+export const adminGetByUserId = async (userId) => {
   return await AdminModel.findOne({ [MongoFields.userId]: userId });
 };

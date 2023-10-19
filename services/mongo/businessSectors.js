@@ -1,6 +1,6 @@
 import { ApplicantModel, BusinessSectorModel } from "../../globals/mongodb.js";
 
-export const businessSector_create = async (data) => {
+export const businessSectorCreate = async (data) => {
   const { name } = data;
 
   const BSDoc = new BusinessSectorModel({
@@ -10,10 +10,10 @@ export const businessSector_create = async (data) => {
   return await BSDoc.save();
 };
 
-export const businessSector_updateById = async (data) => {
+export const businessSectorUpdateById = async (data) => {
   const { id, name } = data;
 
-  const existingBS = await businessSector_getById(id);
+  const existingBS = await businessSectorGetById(id);
 
   if (!existingBS) throw new Error("Sector does not exist");
 
@@ -24,10 +24,10 @@ export const businessSector_updateById = async (data) => {
   return await existingBS.save();
 };
 
-export const businessSector_getAll = async () => {
+export const businessSectorGetAll = async () => {
   return await BusinessSectorModel.find({});
 };
 
-export const businessSector_getById = async (id) => {
+export const businessSectorGetById = async (id) => {
   return await BusinessSectorModel.findOne({ [MongoFields.id]: id });
 };
