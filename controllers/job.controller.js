@@ -13,9 +13,14 @@ const getBySearchAndFilter = asyncHandler(async (req, res) => {
   res.send(RESPONSE({ [ResponseFields.jobList]: jobList }, "Successfully"));
 });
 
+const create = asyncHandler(async (req, res) => {
+  
+});
+
 const JobController = {
   getAll,
   getBySearchAndFilter,
+  create
 };
 
 export default JobController;

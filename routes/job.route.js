@@ -16,6 +16,7 @@ const acceptedQueryParams = [
 ];
 
 jobRouter.get("/all", JobController.getAll);
+jobRouter.post("/", JobController.create);
 jobRouter.get(
   "/query",
   checkQuery(acceptedQueryParams),
