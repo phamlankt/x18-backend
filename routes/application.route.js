@@ -1,13 +1,12 @@
 import express from "express";
-// import { authMiddleware } from "../middlewares/auth.middleware.js";
 import ApplicationController from "../controllers/application.controller.js";
+import { jwtCheck } from "../middlewares/jwt.js";
 
 
 const applicationRouter = express.Router();
 
-// applicationRouter.use(authMiddleware);
 
-applicationRouter.get("/all", ApplicationController.getAll);
+applicationRouter.get("/all", jwtCheck, ApplicationController.getAll);
 
 
 export default applicationRouter;

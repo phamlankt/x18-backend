@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const ApplicationSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   item: {
     type: String,
     required: true,
