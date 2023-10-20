@@ -1,4 +1,6 @@
 import { JobModel } from "../../globals/mongodb.js";
+import { checkIfUserExists, checkIfUserIsActive } from "../../utils/userUtils.js";
+import { calculatePagination } from "../../utils/paginationUtils.js";
 
 // Get active jobs for homepage + search job (users don't need to login)
 export const job_getByQuery = async (query) => {
@@ -62,68 +64,79 @@ export const job_getByQuery = async (query) => {
 };
 
 //Get all jobs for loggin in users 
-export const getAllJobs = async (req, res) => {
-    const userRole = users.roleName;
+export const getAllJobs = async (user, currentPage, pageSize) => {
+  const userID = user.id;
+  const userRole = user.roleName;
+  const userExists = checkIfUserExists(userID);
+  const userIsActive = checkIfUserIsActive(userID);
+  if (!userExists || !userIsActive) {
+    throw new Error('User is not valid');
+  }
 
   let jobQuery = {};
 
-    if (userRole === 'recruiter') {
-      jobQuery.recruiterId = req.userId;
-    } else if (userRole === "admin") {
-    } else {
-      jobQuery = {status: { $in: ["open", "extended"] }
-    }
-
-    const jobs = await JobModel.find(jobQuery)
-      .sort({ _id: -1 }) 
-      .limit(pageSize)
-      .skip(offset);
-
-    const totalCount = await JobModel.countDocuments(jobQuery);
-    const totalPages = Math.ceil(totalCount / pageSize);
-    const hasNext = currentPage < totalPages;
-
-    if (!jobs) {
-        res.status(404).json({ message: "No jobs found" });
-    
-    } else {
-
-    res.status(200).json({
-      data: jobs,
-      hasnext: hasNext,
-      currentPage,
-      pageSize,
-      totalCounts: totalCount,
-      totalPages,
-    });
-  } }
-};
-
-// Get active jobs: applicant, admin, recruiter 
-export const getAllActiveJobs = async (req, res) => {
-  const userRole = req.user?.roleName;
-  let jobQuery = { status: { $in: ["open", "extended"] } };
-
-  if (userRole === "recruiter") {
-    jobQuery.recruiterId = req.user.userId;
+  switch (userRole) {
+    case 'recruiter':
+      jobQuery.recruiterId = userID;
+      break;
+    case 'admin':
+      break;
+    default:
+      jobQuery = { status: { $in: ["open", "extended"] } }
+      break;
   }
+  currentPage = currentPage || 1;
+  const offset = (currentPage - 1) * pageSize;
 
-  const jobs = await JobModel.find(query)
+  const pagination = await calculatePagination(jobQuery, currentPage, pageSize);
+
+  const jobs = await JobModel.find(jobQuery)
     .sort({ _id: -1 })
     .limit(pageSize)
     .skip(offset);
 
-  const totalCount = await JobModel.countDocuments(query);
-
-  const totalPages = Math.ceil(totalCount / pageSize);
-  const hasNext = currentPage < totalPages;
-
-  res.status(200).json({
+  return {
     data: jobs,
-    hasnext: hasNext,
+    hasnext: pagination.hasNext,
     currentPage,
-    pageSize,
-    totalCounts: totalCount,
-    totalPages,
-  });
+    pageSize: pagination.pageSize,
+    totalCounts: pagination.totalCount,
+    totalPages: pagination.totalPages,
+  };
+};
+
+
+// Get active jobs: applicant, admin, recruiter 
+export const getAllActiveJobs = async (user, currentPage, pageSize) => {
+  const userID = user.id;
+  const userRole = user.roleName;
+  const userExists = checkIfUserExists(userID);
+  const userIsActive = checkIfUserIsActive(userID);
+  if (!userExists || !userIsActive) {
+    throw new Error('Unauthorized');
+  }
+
+  let jobQuery = { status: { $in: ["open", "extended"] } };
+
+  if (userRole === "recruiter") {
+    jobQuery.recruiterId = user.userID;
+  }
+  currentPage = currentPage || 1;
+  const offset = (currentPage - 1) * pageSize;
+  const pagination = await calculatePagination(jobQuery, currentPage, pageSize);
+  
+  const jobs = await JobModel.find(jobQuery)
+    .sort({ _id: -1 })
+    .limit(pageSize)
+    .skip(offset);
+
+
+  return {
+    data: jobs,
+    hasnext: pagination.hasNext,
+    currentPage,
+    pageSize: pagination.pageSize,
+    totalCounts: pagination.totalCount,
+    totalPages: pagination.totalPages,
+  };
 };
