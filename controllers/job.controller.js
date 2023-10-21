@@ -129,7 +129,6 @@ const remove = asyncHandler(async (req, res) => {
   }
 });
 
-// Get all jobs
 const getAll = asyncHandler(async (req, res) => {
   const user = req.user;
   const allJobs = await getAllJobs(user);
