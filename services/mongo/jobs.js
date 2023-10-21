@@ -1,3 +1,4 @@
+import { MongoFields } from "../../globals/fields/mongo.js";
 import { JobModel } from "../../globals/mongodb.js";
 
 export const getActiveJobByQuery = async (query) => {
@@ -93,4 +94,16 @@ export const jobCreate = async (data) => {
   });
 
   return await jobDoc.save();
+};
+
+export const jobGetById = async (id) => {
+  return await JobModel.findOne({ [MongoFields.id]: id });
+};
+export const jobRemoveById = async (data) => {
+  const { jobId, status } = data;
+  const existingJob = await jobGetById(jobId);
+  if (!existingJob) throw new Error("Job does not exist!");
+  if (status) existingJob.status = status;
+
+  return await existingJob.save();
 };
