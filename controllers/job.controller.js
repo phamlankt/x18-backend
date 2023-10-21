@@ -79,10 +79,17 @@ const create = asyncHandler(async (req, res) => {
   }
 });
 
+const update = asyncHandler(async (req, res) => {
+});
+
+const remove = asyncHandler(async (req, res) => {
+});
 const JobController = {
   getAll,
   getBySearchAndFilter,
   create,
+  update,
+  remove
 };
 
 export default JobController;
