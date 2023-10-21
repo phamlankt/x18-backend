@@ -200,6 +200,7 @@ export const updateJobById = async (jobId, updateData) => {
   if (userRole !== "recruiter")
   throw new Error("User must be a recruiter in order to create a job");
 
+export const updateJobById = async (jobId, updateData) => {
   try {
     const job = await JobModel.findById(jobId);
 
@@ -217,4 +218,5 @@ export const updateJobById = async (jobId, updateData) => {
   } catch (error) {
     throw new Error('Job update failed: ' + error.message);
   }
+};
 };
