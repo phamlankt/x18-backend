@@ -91,7 +91,47 @@ const create = asyncHandler(async (req, res) => {
   }
 });
 
-const update = asyncHandler(async (req, res) => {});
+const updateJobById = asyncHandler (async (req, res) => {
+  const jobId  = req.params.jobId;
+  const updateData = req.body;
+
+  const validFields = ['title', 'deadline', 'sectors', 'salary', 'location', 'city', 'position', 'amount', 'description'];
+
+  const missingFields = validFields.filter(field => !updateData.hasOwnProperty(field));
+  if (missingFields.length > 0) {
+    throw new Error(`Missing required field(s): ${missingFields.join(', ')}`);
+  }
+
+  for (const field in updateData) {
+    if (!validFields.includes(field)) {
+      throw new Error(`${field} is not a valid field`);
+    }
+  }
+  const { id } = req.users;
+
+  const user = await userGetById(id);
+    if (!user) throw new Error("User does not exist!");
+    if (user.status !== "active") throw new Error("User is inactive!");
+
+  const role = await roleGetById(user.roleId);
+    if (role.name !== "recruiter")
+    throw new Error("User must be a recruiter in order to create a job");
+
+
+  try {
+    const updatedJob = await updateJobById(jobId, updateData);
+
+    res.send({
+      message: 'Job updated successfully',
+      data: updatedJob,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: 'Job update unsuccessful',
+      error: error.message,
+    });
+  }
+});
 
 const remove = asyncHandler(async (req, res) => {
   try {
@@ -150,8 +190,8 @@ const JobController = {
   getBySearchAndFilter,
   getActiveJobs,
   create,
-  update,
   remove,
+  updateJobById
 };
 
 export default JobController; 

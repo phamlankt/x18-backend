@@ -108,7 +108,6 @@ export const getAllJobs = async (user, currentPage, pageSize) => {
   };
 };
 
-
 // Get active jobs: applicant, admin, recruiter 
 export const getAllActiveJobs = async (user, currentPage, pageSize) => {
   const userID = user.id;
@@ -179,6 +178,7 @@ export const jobCreate = async (data) => {
 export const jobGetById = async (id) => {
   return await JobModel.findOne({ [MongoFields.id]: id });
 };
+
 export const jobRemoveById = async (data) => {
   const { jobId, status } = data;
   const existingJob = await jobGetById(jobId);
@@ -186,4 +186,24 @@ export const jobRemoveById = async (data) => {
   if (status) existingJob.status = status;
 
   return await existingJob.save();
+};
+
+export const updateJobById = async (jobId, updateData) => {
+  try {
+    const job = await JobModel.findById(jobId);
+
+    if (!job) {
+      throw new Error('Job not found');
+    }
+
+    for (const field in updateData) {
+      if (Object.prototype.hasOwnProperty.call(updateData, field)) {
+        job[field] = updateData[field];
+      }
+    }
+    const updatedJob = await job.save();
+    return updatedJob;
+  } catch (error) {
+    throw new Error('Job update failed: ' + error.message);
+  }
 };
