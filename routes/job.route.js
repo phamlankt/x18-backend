@@ -17,12 +17,14 @@ const acceptedQueryParams = [
   "location",
 ];
 
-jobRouter.get("/all", JobController.getAll);
+jobRouter.get("/", JobController.getAll);
 jobRouter.post("/",validationMdw(jobSchema),jwtCheck, JobController.create);
 jobRouter.get(
   "/query",
   checkQuery(acceptedQueryParams),
   JobController.getBySearchAndFilter
+);
+jobRouter.put("/:jobId",validationMdw(jobSchema),jwtCheck, JobController.updateJobById
 );
 
 export default jobRouter;

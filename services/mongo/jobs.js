@@ -94,3 +94,23 @@ export const jobCreate = async (data) => {
 
   return await jobDoc.save();
 };
+
+export const updateJobById = async (jobId, updateData) => {
+  try {
+    const job = await JobModel.findById(jobId);
+
+    if (!job) {
+      throw new Error('Job not found');
+    }
+
+    for (const field in updateData) {
+      if (Object.prototype.hasOwnProperty.call(updateData, field)) {
+        job[field] = updateData[field];
+      }
+    }
+    const updatedJob = await job.save();
+    return updatedJob;
+  } catch (error) {
+    throw new Error('Job update failed: ' + error.message);
+  }
+};
