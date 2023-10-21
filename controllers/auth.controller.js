@@ -1,17 +1,17 @@
 import asyncHandler from "express-async-handler";
 import {
-  user_create,
-  user_getAllDetailsById,
-  user_getByEmail,
+  userCreate,
+  userGetAllDetailsById,
+  userGetByEmail,
 } from "../services/mongo/users.js";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { MongoFields } from "../globals/fields/mongo.js";
 import { comparePassWord } from "../globals/config.js";
 import { jwtSign } from "../globals/jwt.js";
-import { role_getById, role_getByName } from "../services/mongo/roles.js";
-import { recruiter_create } from "../services/mongo/recruiters.js";
-import { applicant_create } from "../services/mongo/applicant.js";
+import { roleGetById, roleGetByName } from "../services/mongo/roles.js";
+import { recruiterCreate } from "../services/mongo/recruiters.js";
+import { applicantCreate } from "../services/mongo/applicant.js";
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -21,7 +21,7 @@ const login = asyncHandler(async (req, res) => {
     if (!email || !password) throw new Error("Missing required fields");
 
     //   2. Check authentication
-    const existingUser = await user_getByEmail(email, true);
+    const existingUser = await userGetByEmail(email, true);
 
     if (!existingUser) throw new Error("Invalid credentials!");
 
@@ -33,7 +33,7 @@ const login = asyncHandler(async (req, res) => {
     if (!isMatchPassword) throw new Error("Email or password is not correct!");
 
     // Create JWT Token & Response to client
-    const roleObj = (await role_getById(existingUser.roleId))
+    const roleObj = (await roleGetById(existingUser.roleId))
     const roleName = roleObj.name
     
     const jwtPayload = {
@@ -67,14 +67,14 @@ const register = async (req, res) => {
       throw new Error("Missing required fields");
 
     // Tránh trùng email
-    if (await user_getByEmail(email)) throw new Error("User exists");
+    if (await userGetByEmail(email)) throw new Error("User exists");
 
     // Get roleid
-    const r = await role_getByName(role);
+    const r = await roleGetByName(role);
     const roleId = r[MongoFields.id];
 
     //  Create new register object
-    const newRegister = await user_create({
+    const newRegister = await userCreate({
       email,
       password,
       roleId,
@@ -84,9 +84,9 @@ const register = async (req, res) => {
 
     // Create object in recruiters or applicants collection
     if (role === "recruiter")
-      await recruiter_create({ userId: newRegister[MongoFields.id] });
+      await recruiterCreate({ userId: newRegister[MongoFields.id] });
     else if (role === "applicant")
-      await applicant_create({ userId: newRegister[MongoFields.id] });
+      await applicantCreate({ userId: newRegister[MongoFields.id] });
     // 4. Response to client
     res.send(
       RESPONSE(
@@ -106,7 +106,7 @@ const register = async (req, res) => {
 const getMe = asyncHandler(async (req, res) => {
   const { id } = req.users;
   try {
-    const currentUser = await user_getAllDetailsById(id);
+    const currentUser = await userGetAllDetailsById(id);
     res.send(
       RESPONSE(
         {

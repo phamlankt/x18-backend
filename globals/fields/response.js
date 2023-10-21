@@ -7,10 +7,14 @@ const ResponseFields = {
     cussor: "cussor",
     did: "Did",
     userInfo: "userInfo",
+    jobInfo: "jobInfo",
+    applicationInfo: "applicationInfo",
     businessSectorList:"businessSectorList",
     imageList:"imageList",
     CodeMessage: "CodeMessage",
-    message:"message"
+    message:"message",
+    applicationList: "applicationList",
+    jobList: "jobList",
 }
 
 export { ResponseFields };

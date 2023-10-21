@@ -1,8 +1,8 @@
+import { MongoFields } from "../../globals/fields/mongo.js";
 import { JobModel } from "../../globals/mongodb.js";
 import { checkIfUserExists, checkIfUserIsActive } from "../../utils/userUtils.js";
 import { calculatePagination } from "../../utils/paginationUtils.js";
 
-// Get active jobs for homepage + search job (users don't need to login)
 export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
     query;
@@ -12,10 +12,10 @@ export const getActiveJobByQuery = async (query) => {
   let queryCondition = { status: { $in: ["open", "extended"] } };
 
   if (!currentPage || isNaN(currentPage) || currentPage < 1) {
-    query.currentPage = 1;
+    currentPage = 1;
   }
   if (!pageSize || isNaN(pageSize) || pageSize < 1) {
-    query.pageSize = 0;
+    pageSize = 0;
   }
 
   if (search) {
@@ -39,14 +39,24 @@ export const getActiveJobByQuery = async (query) => {
     queryCondition.city = { $in: locationArray };
   }
 
+  const totalJobCount = await JobModel.countDocuments(queryCondition);
+  if (totalJobCount <= 0) {
+    return {
+      jobs: [],
+      pagination: {
+        totalJobCount,
+        isNext: false,
+        offset,
+      },
+    };
+  }
+
   const jobs = await JobModel.find(queryCondition)
     .sort({ [sortFieldValue]: sortByValue })
     .limit(pageSize)
     .skip(offset);
 
-  const totalJobCount = await JobModel.countDocuments(queryCondition);
   const isNext = totalJobCount > offset + jobs.length;
-
   const pagination = {
     totalJobCount,
     isNext,
@@ -169,7 +179,6 @@ export const jobCreate = async (data) => {
 export const jobGetById = async (id) => {
   return await JobModel.findOne({ [MongoFields.id]: id });
 };
-
 export const jobRemoveById = async (data) => {
   const { jobId, status } = data;
   const existingJob = await jobGetById(jobId);

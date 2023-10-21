@@ -7,7 +7,7 @@ import { jwtCheck } from "../middlewares/jwt.js";
 
 const jobRouter = express.Router();
 
-const queryParams = [
+const acceptedQueryParams = [
   "search",
   "sectors",
   "sortBy",
@@ -18,6 +18,7 @@ const queryParams = [
 ];
 
 jobRouter.get("/",jwtCheck, JobController.getAll);
+jobRouter.get("/all", JobController.getAll);
 jobRouter.post("/create",validationMdw(jobSchema),jwtCheck, JobController.create);
 jobRouter.post("/remove",jwtCheck, JobController.remove);
 jobRouter.get(

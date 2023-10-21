@@ -1,13 +1,18 @@
 import express from "express";
-// import { authMiddleware } from "../middlewares/auth.middleware.js";
 import ApplicationController from "../controllers/application.controller.js";
-
+import { jwtCheck } from "../middlewares/jwt.js";
+import { validationMdw } from "../middlewares/validate.middleware.js";
+import { applicationSchema } from "../validations/application.validation.js";
 
 const applicationRouter = express.Router();
 
-// applicationRouter.use(authMiddleware);
-
-applicationRouter.get("/all", ApplicationController.getAll);
-
+applicationRouter.get("/all", jwtCheck, ApplicationController.getAll);
+applicationRouter.post(
+  "/create",
+  validationMdw(applicationSchema),
+  jwtCheck,
+  ApplicationController.create
+);
+applicationRouter.post("/cancel", jwtCheck, ApplicationController.cancel);
 
 export default applicationRouter;
