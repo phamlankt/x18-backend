@@ -1,3 +1,4 @@
+import { MongoFields } from "../../globals/fields/mongo.js";
 import { ApplicationModel } from "../../globals/mongodb.js";
 
 export const applicationGetAll = async (req) => {
@@ -29,4 +30,41 @@ export const applicationGetAll = async (req) => {
   };
 
   return result;
+};
+
+export const applicationCreate = async (data) => {
+  const { applicantId, jobId, documents, note, status } = data;
+
+  const applicationDoc = new ApplicationModel({
+    applicantId,
+    jobId,
+    documents,
+    note,
+    status,
+  });
+
+  return await applicationDoc.save();
+};
+
+export const applicationCancel = async (data) => {
+  const { applicationId, status } = data;
+  const existingApplication = await applicationGetById(applicationId);
+  if (!existingApplication) throw new Error("Application does not exist!");
+  if (status) existingApplication.status = status;
+
+  return await existingApplication.save();
+};
+
+export const applicationGetById = async (id) => {
+  return await ApplicationModel.findOne({ [MongoFields.id]: id });
+};
+
+export const applicationGetByApplicantIdAndJobId = async (
+  applicantId,
+  jobId
+) => {
+  return await ApplicationModel.findOne({
+    [MongoFields.applicantId]: applicantId,
+    [MongoFields.jobId]: jobId,
+  });
 };
