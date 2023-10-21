@@ -1,7 +1,9 @@
 import express from "express";
-import { jwtCheck } from "../middlewares/jwt.js";
 import JobController from "../controllers/job.controller.js";
 import { checkQuery } from "../middlewares/checkQuery.middleware.js";
+import { jobSchema } from "../validations/job.validation.js";
+import { validationMdw } from "../middlewares/validate.middleware.js";
+import { jwtCheck } from "../middlewares/jwt.js";
 
 const jobRouter = express.Router();
 
@@ -15,8 +17,14 @@ const queryParams = [
   "location",
 ];
 
-jobRouter.get("/", jwtCheck, JobController.getAll);
-jobRouter.get("/query", checkQuery(queryParams), JobController.getByQuery);
-jobRouter.get("/active", jwtCheck, JobController.getActiveJobs);
+jobRouter.get("/",jwtCheck, JobController.getAll);
+jobRouter.post("/create",validationMdw(jobSchema),jwtCheck, JobController.create);
+jobRouter.post("/remove",jwtCheck, JobController.remove);
+jobRouter.get(
+  "/query",
+  checkQuery(acceptedQueryParams),
+  JobController.getBySearchAndFilter
+);
+jobRouter.get("/active",jwtCheck, JobController.getActiveJobs )
 
 export default jobRouter;

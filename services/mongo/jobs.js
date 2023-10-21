@@ -3,17 +3,10 @@ import { checkIfUserExists, checkIfUserIsActive } from "../../utils/userUtils.js
 import { calculatePagination } from "../../utils/paginationUtils.js";
 
 // Get active jobs for homepage + search job (users don't need to login)
-export const job_getByQuery = async (query) => {
-  const {
-    search,
-    sectors,
-    sortBy,
-    sortField,
-    currentPage,
-    pageSize,
-    location,
-  } = query;
-  const offset = (currentPage - 1) * pageSize;
+export const getActiveJobByQuery = async (query) => {
+  let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
+    query;
+  const offset = (currentPage - 1) * pageSize || 0;
   const sortFieldValue = sortField || "createdAt";
   let sortByValue = sortBy === "asc" && sortBy ? 1 : -1;
   let queryCondition = { status: { $in: ["open", "extended"] } };
@@ -139,4 +132,49 @@ export const getAllActiveJobs = async (user, currentPage, pageSize) => {
     totalCounts: pagination.totalCount,
     totalPages: pagination.totalPages,
   };
+};
+
+export const jobCreate = async (data) => {
+  const {
+    title,
+    deadline,
+    creator,
+    sectors,
+    salary,
+    location,
+    city,
+    position,
+    amount,
+    description,
+    status,
+  } = data;
+
+  const jobDoc = new JobModel({
+    title: title,
+    deadline: deadline,
+    creator: creator,
+    sectors: sectors,
+    salary: salary,
+    location: location,
+    city: city,
+    position: position,
+    amount: amount,
+    description: description,
+    status: status,
+  });
+
+  return await jobDoc.save();
+};
+
+export const jobGetById = async (id) => {
+  return await JobModel.findOne({ [MongoFields.id]: id });
+};
+
+export const jobRemoveById = async (data) => {
+  const { jobId, status } = data;
+  const existingJob = await jobGetById(jobId);
+  if (!existingJob) throw new Error("Job does not exist!");
+  if (status) existingJob.status = status;
+
+  return await existingJob.save();
 };
