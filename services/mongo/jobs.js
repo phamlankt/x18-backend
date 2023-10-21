@@ -189,6 +189,17 @@ export const jobRemoveById = async (data) => {
 };
 
 export const updateJobById = async (jobId, updateData) => {
+  const userID = user.id;
+  const userRole = user.roleName;
+  const userExists = checkIfUserExists(userID);
+  const userIsActive = checkIfUserIsActive(userID);
+  if (!userExists || !userIsActive) {
+    throw new Error('User is not valid');
+  }
+ 
+  if (userRole !== "recruiter")
+  throw new Error("User must be a recruiter in order to create a job");
+
   try {
     const job = await JobModel.findById(jobId);
 

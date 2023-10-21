@@ -92,6 +92,7 @@ const create = asyncHandler(async (req, res) => {
 });
 
 const updateJobById = asyncHandler (async (req, res) => {
+  const user = req.user;
   const jobId  = req.params.jobId;
   const updateData = req.body;
 
@@ -107,16 +108,6 @@ const updateJobById = asyncHandler (async (req, res) => {
       throw new Error(`${field} is not a valid field`);
     }
   }
-  const { id } = req.users;
-
-  const user = await userGetById(id);
-    if (!user) throw new Error("User does not exist!");
-    if (user.status !== "active") throw new Error("User is inactive!");
-
-  const role = await roleGetById(user.roleId);
-    if (role.name !== "recruiter")
-    throw new Error("User must be a recruiter in order to create a job");
-
 
   try {
     const updatedJob = await updateJobById(jobId, updateData);
