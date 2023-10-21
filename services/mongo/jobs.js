@@ -1,5 +1,7 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
 import { JobModel } from "../../globals/mongodb.js";
+import { checkIfUserExists, checkIfUserIsActive } from "../../utils/userUtils.js";
+import { calculatePagination } from "../../utils/paginationUtils.js";
 
 export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
@@ -62,6 +64,84 @@ export const getActiveJobByQuery = async (query) => {
   };
 
   return { jobs, pagination };
+};
+
+//Get all jobs for loggin in users 
+export const getAllJobs = async (user, currentPage, pageSize) => {
+  const userID = user.id;
+  const userRole = user.roleName;
+  const userExists = checkIfUserExists(userID);
+  const userIsActive = checkIfUserIsActive(userID);
+  if (!userExists || !userIsActive) {
+    throw new Error('User is not valid');
+  }
+
+  let jobQuery = {};
+
+  switch (userRole) {
+    case 'recruiter':
+      jobQuery.recruiterId = userID;
+      break;
+    case 'admin':
+      break;
+    default:
+      jobQuery = { status: { $in: ["open", "extended"] } }
+      break;
+  }
+  currentPage = currentPage || 1;
+  const offset = (currentPage - 1) * pageSize;
+
+  const pagination = await calculatePagination(jobQuery, currentPage, pageSize);
+
+  const jobs = await JobModel.find(jobQuery)
+    .sort({ _id: -1 })
+    .limit(pageSize)
+    .skip(offset);
+
+  return {
+    data: jobs,
+    hasnext: pagination.hasNext,
+    currentPage,
+    pageSize: pagination.pageSize,
+    totalCounts: pagination.totalCount,
+    totalPages: pagination.totalPages,
+  };
+};
+
+
+// Get active jobs: applicant, admin, recruiter 
+export const getAllActiveJobs = async (user, currentPage, pageSize) => {
+  const userID = user.id;
+  const userRole = user.roleName;
+  const userExists = checkIfUserExists(userID);
+  const userIsActive = checkIfUserIsActive(userID);
+  if (!userExists || !userIsActive) {
+    throw new Error('Unauthorized');
+  }
+
+  let jobQuery = { status: { $in: ["open", "extended"] } };
+
+  if (userRole === "recruiter") {
+    jobQuery.recruiterId = user.userID;
+  }
+  currentPage = currentPage || 1;
+  const offset = (currentPage - 1) * pageSize;
+  const pagination = await calculatePagination(jobQuery, currentPage, pageSize);
+  
+  const jobs = await JobModel.find(jobQuery)
+    .sort({ _id: -1 })
+    .limit(pageSize)
+    .skip(offset);
+
+
+  return {
+    data: jobs,
+    hasnext: pagination.hasNext,
+    currentPage,
+    pageSize: pagination.pageSize,
+    totalCounts: pagination.totalCount,
+    totalPages: pagination.totalPages,
+  };
 };
 
 export const jobCreate = async (data) => {

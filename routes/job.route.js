@@ -17,6 +17,7 @@ const acceptedQueryParams = [
   "location",
 ];
 
+jobRouter.get("/",jwtCheck, JobController.getAll);
 jobRouter.get("/all", JobController.getAll);
 jobRouter.post("/create",validationMdw(jobSchema),jwtCheck, JobController.create);
 jobRouter.post("/remove",jwtCheck, JobController.remove);
@@ -25,5 +26,6 @@ jobRouter.get(
   checkQuery(acceptedQueryParams),
   JobController.getBySearchAndFilter
 );
+jobRouter.get("/active",jwtCheck, JobController.getActiveJobs )
 
 export default jobRouter;
