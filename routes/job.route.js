@@ -19,7 +19,6 @@ const acceptedQueryParams = [
 
 jobRouter.get("/all", JobController.getAll);
 jobRouter.post("/create",validationMdw(jobSchema),jwtCheck, JobController.create);
-jobRouter.post("/update",jwtCheck, JobController.update);
 jobRouter.post("/remove",jwtCheck, JobController.remove);
 jobRouter.get(
   "/query",
