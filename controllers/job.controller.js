@@ -5,7 +5,7 @@ import {
   jobGetById,
   jobRemoveById,
   getAllActiveJobs,
-  getAllJobs
+  getAllJobs,
 } from "../services/mongo/jobs.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { RESPONSE } from "../globals/api.js";
@@ -16,7 +16,7 @@ import { roleGetById } from "../services/mongo/roles.js";
 const getAll = asyncHandler(async (req, res) => {
   const user = req.user;
   const allJobs = await getAllJobs(user);
-  res.json(allJobs);;
+  res.json(allJobs);
 });
 
 const getBySearchAndFilter = asyncHandler(async (req, res) => {
@@ -52,6 +52,7 @@ const create = asyncHandler(async (req, res) => {
       !description
     )
       throw new Error("Missing required fields");
+
     const { id } = req.users;
 
     const user = await userGetById(id);
@@ -59,7 +60,7 @@ const create = asyncHandler(async (req, res) => {
     if (user.status !== "active") throw new Error("User is inactive!");
 
     const role = await roleGetById(user.roleId);
-    if(!role) throw new Error("Role does not exist!")
+    if (!role) throw new Error("Role does not exist!");
     if (role.name !== "recruiter")
       throw new Error("User must be a recruiter in order to create a job");
 
@@ -76,6 +77,7 @@ const create = asyncHandler(async (req, res) => {
       description,
       status: "open",
     });
+
     res.send(
       RESPONSE(
         {
@@ -138,10 +140,9 @@ const remove = asyncHandler(async (req, res) => {
   }
 });
 
-
 const getActiveJobs = asyncHandler(async (req, res) => {
   const user = req.user;
-  const allActiveJobs = await getAllActiveJobs(user); 
+  const allActiveJobs = await getAllActiveJobs(user);
   res.json(allActiveJobs);
 });
 
@@ -154,5 +155,4 @@ const JobController = {
   remove,
 };
 
-export default JobController; 
-
+export default JobController;
