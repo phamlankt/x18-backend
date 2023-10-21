@@ -5,6 +5,9 @@ const MongoFields = {
   createdAt: "createdAt",
   updatedAt: "updatedAt",
 
+  applicantId:"applicantId",
+  jobId:"jobId",
+
   roleName: "name",
 
   fullName: "fullName",

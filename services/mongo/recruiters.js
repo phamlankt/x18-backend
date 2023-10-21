@@ -4,8 +4,15 @@ import { MongoFields } from "../../globals/fields/mongo.js";
 import { RecruiterModel, UserModel } from "../../globals/mongodb.js";
 
 export const recruiterCreate = async (data) => {
-  const { userId, companyName, phoneNumber, address, sectors, description,avatarUrl } =
-    data;
+  const {
+    userId,
+    companyName,
+    phoneNumber,
+    address,
+    sectors,
+    description,
+    avatarUrl,
+  } = data;
 
   const userDoc = new RecruiterModel({
     userId: userId,
@@ -14,7 +21,7 @@ export const recruiterCreate = async (data) => {
     address: address,
     sectors: sectors,
     description: description,
-    avatarUrl:avatarUrl
+    avatarUrl: avatarUrl,
   });
 
   return await userDoc.save();

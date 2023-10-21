@@ -53,6 +53,7 @@ const create = asyncHandler(async (req, res) => {
     if (user.status !== "active") throw new Error("User is inactive!");
 
     const role = await roleGetById(user.roleId);
+    if(!role) throw new Error("Role does not exist!")
     if (role.name !== "recruiter")
       throw new Error("User must be a recruiter in order to create a job");
 
