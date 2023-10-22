@@ -26,7 +26,7 @@ jobRouter.get(
   JobController.getBySearchAndFilter
 );
 jobRouter.get("/active",jwtCheck, JobController.getActiveJobs )
-jobRouter.put("/:jobId",validationMdw(jobSchema),jwtCheck, JobController.updateJobById
+jobRouter.put("/:jobId",validationMdw(jobSchema),jwtCheck, JobController.update
 );
 
 export default jobRouter;

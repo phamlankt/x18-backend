@@ -6,6 +6,7 @@ import {
   jobRemoveById,
   getAllActiveJobs,
   getAllJobs,
+  updateJobById,
 } from "../services/mongo/jobs.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { RESPONSE } from "../globals/api.js";
@@ -93,7 +94,7 @@ const create = asyncHandler(async (req, res) => {
   }
 });
 
-const updateJobById = asyncHandler(async (req, res) => {
+const update = asyncHandler(async (req, res) => {
   try {
     const jobId = req.params.jobId; 
     const { id } = req.users;
@@ -192,7 +193,7 @@ const JobController = {
   getActiveJobs,
   create,
   remove,
-  updateJobById
+  update
 };
 
 export default JobController;
