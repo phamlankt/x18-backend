@@ -71,23 +71,20 @@ export const getAllJobs = async (user, currentPage, pageSize) => {
   const userID = user.id;
   const userRole = user.roleName;
   const userExists = checkIfUserExists(userID);
+
+  if (!userExists) {throw new Error('User does not exist')};
+
   const userIsActive = checkIfUserIsActive(userID);
-  if (!userExists || !userIsActive) {
-    throw new Error('User is not valid');
-  }
+  if (!userIsActive) {throw new Error('User is not active');}
+
+  if (userRole === 'applicant') {throw new Error('Unauthorized');}
 
   let jobQuery = {};
 
-  switch (userRole) {
-    case 'recruiter':
-      jobQuery.recruiterId = userID;
-      break;
-    case 'admin':
-      break;
-    default:
-      jobQuery = { status: { $in: ["open", "extended"] } }
-      break;
+  if (userRole === "recruiter") {
+    jobQuery.recruiterId = user.userID;
   }
+
   currentPage = currentPage || 1;
   const offset = (currentPage - 1) * pageSize;
 
@@ -108,15 +105,14 @@ export const getAllJobs = async (user, currentPage, pageSize) => {
   };
 };
 
-// Get active jobs: applicant, admin, recruiter 
+// Get active jobs: applicant, admin, recruiter -- maybe not use
 export const getAllActiveJobs = async (user, currentPage, pageSize) => {
   const userID = user.id;
   const userRole = user.roleName;
   const userExists = checkIfUserExists(userID);
+  if (!userExists) {throw new Error('User does not exist')};
   const userIsActive = checkIfUserIsActive(userID);
-  if (!userExists || !userIsActive) {
-    throw new Error('Unauthorized');
-  }
+  if (!userIsActive) {throw new Error('User is not active');}
 
   let jobQuery = { status: { $in: ["open", "extended"] } };
 
