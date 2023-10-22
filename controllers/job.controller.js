@@ -14,7 +14,7 @@ import { roleGetById } from "../services/mongo/roles.js";
 
 // Get all  jobs
 const getAll = asyncHandler(async (req, res) => {
-  const user = req.user;
+  const user = req.users;
   const allJobs = await getAllJobs(user);
   res.json(allJobs);
 });
@@ -93,38 +93,47 @@ const create = asyncHandler(async (req, res) => {
   }
 });
 
-const updateJobById = asyncHandler (async (req, res) => {
-  const user = req.user;
-  const jobId  = req.params.jobId;
-  const updateData = req.body;
-
-  const validFields = ['title', 'deadline', 'sectors', 'salary', 'location', 'city', 'position', 'amount', 'description'];
-
-  const missingFields = validFields.filter(field => !updateData.hasOwnProperty(field));
-  if (missingFields.length > 0) {
-    throw new Error(`Missing required field(s): ${missingFields.join(', ')}`);
-  }
-
-  for (const field in updateData) {
-    if (!validFields.includes(field)) {
-      throw new Error(`${field} is not a valid field`);
-    }
-  }
-
+const updateJobById = asyncHandler(async (req, res) => {
   try {
-    const updatedJob = await updateJobById(jobId, updateData);
+    const jobId = req.params.jobId; 
+    const { id } = req.users;
+    const updateData = req.body; 
 
-    res.send({
-      message: 'Job updated successfully',
-      data: updatedJob,
-    });
+    const user = await userGetById(id);
+    if (!user) throw new Error("User does not exist!");
+    if (user.status !== "active") throw new Error("User is inactive!");
+
+    const role = await roleGetById(user.roleId);
+    if (!role) throw new Error("Role does not exist!");
+
+    if (role.name !== "recruiter")
+      throw new Error(
+        "User must be a recruiter in order to update their created job"
+      );
+
+    const currentJob = await jobGetById(jobId);
+    if (!currentJob) throw new Error("Job does not exist!");
+    if (currentJob.creator !== id)
+      throw new Error(
+        "User is not the owner of this job, hence is not allowed to update this job"
+      );
+
+    const updatedJob = await updateJobById(jobId, updateData);
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.jobInfo]: updatedJob,
+        },
+        "Update job successfully"
+      )
+    );
   } catch (error) {
-    res.status(400).json({
-      message: 'Job update unsuccessful',
-      error: error.message,
-    });
+    res.status(400).send(
+      RESPONSE([], "Update job unsuccessfully", error.errors, error.message)
+    );
   }
 });
+
 
 const remove = asyncHandler(async (req, res) => {
   try {
@@ -172,7 +181,7 @@ const remove = asyncHandler(async (req, res) => {
 });
 
 const getActiveJobs = asyncHandler(async (req, res) => {
-  const user = req.user;
+  const user = req.users;
   const allActiveJobs = await getAllActiveJobs(user);
   res.json(allActiveJobs);
 });

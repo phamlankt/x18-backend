@@ -189,34 +189,14 @@ export const jobRemoveById = async (data) => {
 };
 
 export const updateJobById = async (jobId, updateData) => {
-  const userID = user.id;
-  const userRole = user.roleName;
-  const userExists = checkIfUserExists(userID);
-  const userIsActive = checkIfUserIsActive(userID);
-  if (!userExists || !userIsActive) {
-    throw new Error('User is not valid');
-  }
- 
-  if (userRole !== "recruiter")
-  throw new Error("User must be a recruiter in order to create a job");
-
-export const updateJobById = async (jobId, updateData) => {
-  try {
-    const job = await JobModel.findById(jobId);
-
-    if (!job) {
-      throw new Error('Job not found');
+  const existingJob = await jobGetById(jobId);
+  
+  if (!existingJob) {throw new Error("Job does not exist!");}
+  for (const prop in updateData) {
+    if (updateData.hasOwnProperty(prop)) {
+      existingJob[prop] = updateData[prop];
     }
-
-    for (const field in updateData) {
-      if (Object.prototype.hasOwnProperty.call(updateData, field)) {
-        job[field] = updateData[field];
-      }
-    }
-    const updatedJob = await job.save();
-    return updatedJob;
-  } catch (error) {
-    throw new Error('Job update failed: ' + error.message);
   }
-};
+
+  return await existingJob.save();
 };
