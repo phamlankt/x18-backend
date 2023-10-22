@@ -105,7 +105,6 @@ export const getAllJobs = async (user, currentPage, pageSize) => {
   };
 };
 
-
 // Get active jobs: applicant, admin, recruiter -- maybe not use
 export const getAllActiveJobs = async (user, currentPage, pageSize) => {
   const userID = user.id;
@@ -175,11 +174,25 @@ export const jobCreate = async (data) => {
 export const jobGetById = async (id) => {
   return await JobModel.findOne({ [MongoFields.id]: id });
 };
+
 export const jobRemoveById = async (data) => {
   const { jobId, status } = data;
   const existingJob = await jobGetById(jobId);
   if (!existingJob) throw new Error("Job does not exist!");
   if (status) existingJob.status = status;
+
+  return await existingJob.save();
+};
+
+export const updateJobById = async (jobId, updateData) => {
+  const existingJob = await jobGetById(jobId);
+  
+  if (!existingJob) {throw new Error("Job does not exist!");}
+  for (const prop in updateData) {
+    if (updateData.hasOwnProperty(prop)) {
+      existingJob[prop] = updateData[prop];
+    }
+  }
 
   return await existingJob.save();
 };
