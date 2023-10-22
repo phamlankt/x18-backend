@@ -5,7 +5,8 @@ import {
   jobGetById,
   jobRemoveById,
   getAllActiveJobs,
-  getAllJobs
+  getAllJobs,
+  updateJobById,
 } from "../services/mongo/jobs.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { RESPONSE } from "../globals/api.js";
@@ -14,9 +15,9 @@ import { roleGetById } from "../services/mongo/roles.js";
 
 // Get all  jobs
 const getAll = asyncHandler(async (req, res) => {
-  const user = req.user;
+  const user = req.users;
   const allJobs = await getAllJobs(user);
-  res.json(allJobs);;
+  res.json(allJobs);
 });
 
 const getBySearchAndFilter = asyncHandler(async (req, res) => {
@@ -52,6 +53,7 @@ const create = asyncHandler(async (req, res) => {
       !description
     )
       throw new Error("Missing required fields");
+
     const { id } = req.users;
 
     const user = await userGetById(id);
@@ -59,7 +61,7 @@ const create = asyncHandler(async (req, res) => {
     if (user.status !== "active") throw new Error("User is inactive!");
 
     const role = await roleGetById(user.roleId);
-    if(!role) throw new Error("Role does not exist!")
+    if (!role) throw new Error("Role does not exist!");
     if (role.name !== "recruiter")
       throw new Error("User must be a recruiter in order to create a job");
 
@@ -76,6 +78,7 @@ const create = asyncHandler(async (req, res) => {
       description,
       status: "open",
     });
+
     res.send(
       RESPONSE(
         {
@@ -91,7 +94,47 @@ const create = asyncHandler(async (req, res) => {
   }
 });
 
-const update = asyncHandler(async (req, res) => {});
+const update = asyncHandler(async (req, res) => {
+  try {
+    const jobId = req.params.jobId; 
+    const { id } = req.users;
+    const updateData = req.body; 
+
+    const user = await userGetById(id);
+    if (!user) throw new Error("User does not exist!");
+    if (user.status !== "active") throw new Error("User is inactive!");
+
+    const role = await roleGetById(user.roleId);
+    if (!role) throw new Error("Role does not exist!");
+
+    if (role.name !== "recruiter")
+      throw new Error(
+        "User must be a recruiter in order to update their created job"
+      );
+
+    const currentJob = await jobGetById(jobId);
+    if (!currentJob) throw new Error("Job does not exist!");
+    if (currentJob.creator !== id)
+      throw new Error(
+        "User is not the owner of this job, hence is not allowed to update this job"
+      );
+
+    const updatedJob = await updateJobById(jobId, updateData);
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.jobInfo]: updatedJob,
+        },
+        "Update job successfully"
+      )
+    );
+  } catch (error) {
+    res.status(400).send(
+      RESPONSE([], "Update job unsuccessfully", error.errors, error.message)
+    );
+  }
+});
+
 
 const remove = asyncHandler(async (req, res) => {
   try {
@@ -138,10 +181,9 @@ const remove = asyncHandler(async (req, res) => {
   }
 });
 
-
 const getActiveJobs = asyncHandler(async (req, res) => {
-  const user = req.user;
-  const allActiveJobs = await getAllActiveJobs(user); 
+  const user = req.users;
+  const allActiveJobs = await getAllActiveJobs(user);
   res.json(allActiveJobs);
 });
 
@@ -150,9 +192,8 @@ const JobController = {
   getBySearchAndFilter,
   getActiveJobs,
   create,
-  update,
   remove,
+  update
 };
 
-export default JobController; 
-
+export default JobController;
