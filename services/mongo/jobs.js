@@ -67,11 +67,11 @@ export const getActiveJobByQuery = async (query) => {
 };
 
 //Get all jobs for loggin in users 
-export const getAllJobs = async (user, currentPage, pageSize) => {
+export const getAllJobs = async (user, query, currentPage, pageSize) => {
+  let { search, sectors, location, status} = query;
   const userID = user.id;
   const userRole = user.roleName;
   const userExists = checkIfUserExists(userID);
-
   if (!userExists) {throw new Error('User does not exist')};
 
   const userIsActive = checkIfUserIsActive(userID);
@@ -83,6 +83,33 @@ export const getAllJobs = async (user, currentPage, pageSize) => {
 
   if (userRole === "recruiter") {
     jobQuery.recruiterId = user.userID;
+  }
+
+  if (search) {
+    jobQuery.title = { $regex: search, $options: "i" };
+  }
+
+  if (status) {
+    jobQuery.status = status;
+  }
+
+  if (location) {
+    const locationArray = location
+      .split("%")
+      .map((location) => new RegExp(`^${location}$`, "i"));
+    jobQuery.city = { $in: locationArray };
+  }
+  
+  if (sectors) {
+    const sectorsArray = sectors
+      .split("%")
+      .map((sector) => new RegExp(`^${sector}$`, "i"));
+  
+    jobQuery.sectors = {
+      $elemMatch: {
+        $in: sectorsArray,
+      },
+    };
   }
 
   currentPage = currentPage || 1;
