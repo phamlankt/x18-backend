@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import {
+  applicantsAndApplicationsByJobId,
   applicationCancel,
   applicationCreate,
   applicationGetAll,
@@ -48,6 +49,18 @@ const getOfJobId = asyncHandler(async (req, res) => {
     res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
   }
 });
+
+// Get applicants and applications by jobId
+const getApplicantsAndApplications = asyncHandler(async(req, res) => {
+  try {
+    const data = await applicantsAndApplicationsByJobId(req);
+    res.json({
+      data: data,
+    });
+  } catch (error) {
+    res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
+  }
+})
 
 const create = asyncHandler(async (req, res) => {
   try {
@@ -142,6 +155,7 @@ const ApplicationController = {
   getOfJobId,
   create,
   cancel,
+  getApplicantsAndApplications,
 };
 
 export default ApplicationController;

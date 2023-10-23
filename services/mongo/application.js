@@ -1,5 +1,5 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
-import { ApplicationModel } from "../../globals/mongodb.js";
+import { ApplicantModel, ApplicationModel } from "../../globals/mongodb.js";
 
 export const applicationGetAll = async (req) => {
   const { id, roleName } = req.users;
@@ -39,14 +39,40 @@ export const applicationGetOfJobId = async (req) => {
 
   if (!id) throw new Error("User does not exist.");
 
-  if (roleName !== "applicant")
-    throw new Error("You must be an applicant to access this page.");
+  if (roleName !== "recruiter")
+    throw new Error("You must be a recruiter to access this page.");
 
   const applications = await ApplicationModel.find({ jobId: jobId });
 
   if (applications.length === 0) throw new Error("No posts found");
 
   return applications;
+};
+
+export const applicantsAndApplicationsByJobId = async (req) => {
+  const { id, roleName } = req.users;
+  const jobId = req.params.jobId;
+
+  if (!id) throw new Error("User does not exist.");
+
+  if (roleName !== "recruiter")
+    throw new Error("You must be a recruiter to access this page.");
+
+  const applications = await ApplicationModel.find({ jobId: jobId });
+  
+  const applicantIds = applications.map((application) => application.applicantId);
+  const applicants = await ApplicantModel.find({ userId: { $in: applicantIds } });
+
+  const combinedData = applications.map((application) => {
+    const applicant = applicants.find((a) => a.userId === application.applicantId);
+    return {
+      applicant,
+      application,
+    };
+  });
+
+  console.log("Combined Data", combinedData);
+  return combinedData;
 };
 
 export const applicationCreate = async (data) => {
