@@ -59,19 +59,23 @@ export const applicantsAndApplicationsByJobId = async (req) => {
     throw new Error("You must be a recruiter to access this page.");
 
   const applications = await ApplicationModel.find({ jobId: jobId });
-  
-  const applicantIds = applications.map((application) => application.applicantId);
-  const applicants = await ApplicantModel.find({ userId: { $in: applicantIds } });
+
+  const applicantIds = applications.map(
+    (application) => application.applicantId
+  );
+  const applicants = await ApplicantModel.find({
+    userId: { $in: applicantIds },
+  });
 
   const combinedData = applications.map((application) => {
-    const applicant = applicants.find((a) => a.userId === application.applicantId);
+    const applicant = applicants.find(
+      (a) => a.userId === application.applicantId
+    );
     return {
       applicant,
       application,
     };
   });
-
-  console.log("Combined Data", combinedData);
   return combinedData;
 };
 
