@@ -18,7 +18,7 @@ const acceptedQueryParams = [
 ];
 
 jobRouter.get("/", jwtCheck, JobController.getAll);
-jobRouter.get("/:jobId", JobController.getById);
+jobRouter.get("/details/:jobId", JobController.getById);
 jobRouter.post(
   "/create",
   validationMdw(jobSchema),
