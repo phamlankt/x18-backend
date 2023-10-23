@@ -44,7 +44,7 @@ export const applicationGetOfJobId = async (req) => {
 
   const applications = await ApplicationModel.find({ jobId: jobId });
 
-  if (!applications) throw new Error("No posts found");
+  if (applications.length === 0) throw new Error("No posts found");
 
   return applications;
 };
