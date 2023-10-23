@@ -15,9 +15,16 @@ const acceptedQueryParams = [
   "currentPage",
   "pageSize",
   "location",
+  "status"
 ];
 
-jobRouter.get("/", jwtCheck, JobController.getAll);
+jobRouter.get(
+  "/user/query",
+  jwtCheck,
+  checkQuery(acceptedQueryParams),
+  JobController.getAll
+);
+
 jobRouter.get("/details/:jobId", JobController.getById);
 jobRouter.post(
   "/create",

@@ -16,9 +16,11 @@ import { roleGetById } from "../services/mongo/roles.js";
 // Get all  jobs
 const getAll = asyncHandler(async (req, res) => {
   const user = req.users;
-  const allJobs = await getAllJobs(user);
-  res.json(allJobs);
+  const query = req.query;
+  const jobs = await getAllJobs(user, query);
+  res.send(RESPONSE({ [ResponseFields.jobs]: jobs }, "Successfully"));
 });
+
 
 const getById = asyncHandler(async (req, res) => {
   try {
