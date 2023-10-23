@@ -10,11 +10,13 @@ export const applicationGetAll = async (req) => {
   const pageSize = parseInt(req.query.pageSize) || 5;
   const offset = (currentPage - 1) * pageSize;
 
-  const totalCounts = await ApplicationModel.countDocuments({ userId: id });
+  const totalCounts = await ApplicationModel.countDocuments({
+    applicantId: id,
+  });
   const totalPages = Math.ceil(totalCounts / pageSize);
   const hasNext = currentPage < totalPages;
 
-  const appications = await ApplicationModel.find({ userId: id })
+  const appications = await ApplicationModel.find({ applicantId: id })
     .limit(pageSize)
     .skip(offset);
 
@@ -28,8 +30,23 @@ export const applicationGetAll = async (req) => {
       hasNext,
     },
   };
-
   return result;
+};
+
+export const applicationGetOfJobId = async (req) => {
+  const { id, roleName } = req.users;
+  const jobId = req.params.jobId;
+
+  if (!id) throw new Error("User does not exist.");
+
+  if (roleName !== "applicant")
+    throw new Error("You must be an applicant to access this page.");
+
+  const applications = await ApplicationModel.find({ jobId: jobId });
+
+  if (!applications) throw new Error("No posts found");
+
+  return applications;
 };
 
 export const applicationCreate = async (data) => {

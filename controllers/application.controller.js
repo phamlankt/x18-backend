@@ -5,6 +5,7 @@ import {
   applicationGetAll,
   applicationGetByApplicantIdAndJobId,
   applicationGetById,
+  applicationGetOfJobId,
 } from "../services/mongo/application.js";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
@@ -18,6 +19,23 @@ import { MongoFields } from "../globals/fields/mongo.js";
 const getAll = asyncHandler(async (req, res) => {
   try {
     const applications = await applicationGetAll(req);
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.applicationList]: applications,
+        },
+        "Successfully"
+      )
+    );
+  } catch (error) {
+    res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
+  }
+});
+
+// Get applications of jobId
+const getOfJobId = asyncHandler(async (req, res) => {
+  try {
+    const applications = await applicationGetOfJobId(req);
     res.send(
       RESPONSE(
         {
@@ -81,8 +99,7 @@ const cancel = asyncHandler(async (req, res) => {
   try {
     const { applicationId } = req.body;
 
-    if (!applicationId)
-      throw new Error("Missing required fields");
+    if (!applicationId) throw new Error("Missing required fields");
     const { id } = req.users;
 
     const user = await userGetById(id);
@@ -101,7 +118,7 @@ const cancel = asyncHandler(async (req, res) => {
 
     const cancelledApplication = await applicationCancel({
       applicationId: applicationId,
-      status:"cancelled"
+      status: "cancelled",
     });
     res.send(
       RESPONSE(
@@ -122,6 +139,7 @@ const cancel = asyncHandler(async (req, res) => {
 
 const ApplicationController = {
   getAll,
+  getOfJobId,
   create,
   cancel,
 };
