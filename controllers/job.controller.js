@@ -1,16 +1,16 @@
 import asyncHandler from "express-async-handler";
 import {
   getActiveJobByQuery,
-  jobCreate,
-  jobGetById,
-  jobRemoveById,
+  createJob,
+  getJobById,
+  removeJobById,
   getAllActiveJobs,
   getAllJobs,
   updateJobById,
 } from "../services/mongo/jobs.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { RESPONSE } from "../globals/api.js";
-import { userGetById } from "../services/mongo/users.js";
+import { getUserById } from "../services/mongo/users.js";
 import { roleGetById } from "../services/mongo/roles.js";
 
 // Get all  jobs
@@ -18,6 +18,28 @@ const getAll = asyncHandler(async (req, res) => {
   const user = req.users;
   const allJobs = await getAllJobs(user);
   res.json(allJobs);
+});
+
+const getById = asyncHandler(async (req, res) => {
+  try {
+   
+   const jobId = req.params.jobId
+
+    const existingJob = await getJobById(jobId);
+
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.jobInfo]: existingJob,
+        },
+        "Get job successfully"
+      )
+    );
+  } catch (e) {
+    res
+      .status(400)
+      .send(RESPONSE([], "Get job unsuccessful", e.errors, e.message));
+  }
 });
 
 const getBySearchAndFilter = asyncHandler(async (req, res) => {
@@ -41,22 +63,9 @@ const create = asyncHandler(async (req, res) => {
       description,
     } = req.body;
 
-    if (
-      !title ||
-      !deadline ||
-      !sectors ||
-      !salary ||
-      !location ||
-      !city ||
-      !position ||
-      !amount ||
-      !description
-    )
-      throw new Error("Missing required fields");
-
     const { id } = req.users;
 
-    const user = await userGetById(id);
+    const user = await getUserById(id);
     if (!user) throw new Error("User does not exist!");
     if (user.status !== "active") throw new Error("User is inactive!");
 
@@ -65,7 +74,7 @@ const create = asyncHandler(async (req, res) => {
     if (role.name !== "recruiter")
       throw new Error("User must be a recruiter in order to create a job");
 
-    const newJob = await jobCreate({
+    const newJob = await createJob({
       title,
       deadline: new Date(deadline),
       creator: id,
@@ -100,7 +109,7 @@ const update = asyncHandler(async (req, res) => {
     const { id } = req.users;
     const updateData = req.body; 
 
-    const user = await userGetById(id);
+    const user = await getUserById(id);
     if (!user) throw new Error("User does not exist!");
     if (user.status !== "active") throw new Error("User is inactive!");
 
@@ -112,7 +121,7 @@ const update = asyncHandler(async (req, res) => {
         "User must be a recruiter in order to update their created job"
       );
 
-    const currentJob = await jobGetById(jobId);
+    const currentJob = await getJobById(jobId);
     if (!currentJob) throw new Error("Job does not exist!");
     if (currentJob.creator !== id)
       throw new Error(
@@ -143,7 +152,7 @@ const remove = asyncHandler(async (req, res) => {
     if (!jobId) throw new Error("Missing required fields");
     const { id } = req.users;
 
-    const user = await userGetById(id);
+    const user = await getUserById(id);
     if (!user) throw new Error("User does not exist!");
     if (user.status !== "active") throw new Error("User is inactive!");
 
@@ -155,14 +164,14 @@ const remove = asyncHandler(async (req, res) => {
         "User must be a recruiter in order to remove his/her created job"
       );
 
-    const currentJob = await jobGetById(jobId);
+    const currentJob = await getJobById(jobId);
     if (!currentJob) throw new Error("Job does not exist!");
     if (currentJob.creator !== id)
       throw new Error(
         "User is not the owner of this job, hence is not allowed to remove this job"
       );
 
-    const removedJob = await jobRemoveById({
+    const removedJob = await removeJobById({
       jobId,
       status: "removed",
     });
@@ -189,6 +198,7 @@ const getActiveJobs = asyncHandler(async (req, res) => {
 
 const JobController = {
   getAll,
+  getById,
   getBySearchAndFilter,
   getActiveJobs,
   create,

@@ -23,7 +23,7 @@ export const userCreate = async (data, isHashPassword = true) => {
 export const userUpdateById = async (data) => {
   const { id, email, password, is_password_resetting, status, roleId } = data;
 
-  const existingUser = await userGetById(id);
+  const existingUser = await getUserById(id);
 
   if (!existingUser) throw new Error("User does not exist");
 
@@ -51,7 +51,7 @@ export const userUpdateById = async (data) => {
   return await existingUser.save();
 };
 
-export const userGetById = async (id, isShowPassword = false) => {
+export const getUserById = async (id, isShowPassword = false) => {
   if (isShowPassword) return await UserModel.findOne({ [MongoFields.id]: id });
   return await UserModel.findOne({ [MongoFields.id]: id }).select("-password");
 };
@@ -65,7 +65,7 @@ export const userGetByEmail = async (email, isShowPassword = false) => {
 };
 
 export const userGetAllDetailsById = async (id) => {
-  let currentUser = await userGetById(id);
+  let currentUser = await getUserById(id);
   if (!currentUser) throw new Error("User does not exist");
   const currentRole = await roleGetById(currentUser.roleId);
   if (!currentRole) throw new Error("Role does not exist");

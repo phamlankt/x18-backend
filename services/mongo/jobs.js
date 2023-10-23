@@ -139,7 +139,7 @@ export const getAllActiveJobs = async (user, currentPage, pageSize) => {
   };
 };
 
-export const jobCreate = async (data) => {
+export const createJob = async (data) => {
   const {
     title,
     deadline,
@@ -171,13 +171,13 @@ export const jobCreate = async (data) => {
   return await jobDoc.save();
 };
 
-export const jobGetById = async (id) => {
+export const getJobById = async (id) => {
   return await JobModel.findOne({ [MongoFields.id]: id });
 };
 
-export const jobRemoveById = async (data) => {
+export const removeJobById = async (data) => {
   const { jobId, status } = data;
-  const existingJob = await jobGetById(jobId);
+  const existingJob = await getJobById(jobId);
   if (!existingJob) throw new Error("Job does not exist!");
   if (status) existingJob.status = status;
 
@@ -185,7 +185,7 @@ export const jobRemoveById = async (data) => {
 };
 
 export const updateJobById = async (jobId, updateData) => {
-  const existingJob = await jobGetById(jobId);
+  const existingJob = await getJobById(jobId);
   
   if (!existingJob) {throw new Error("Job does not exist!");}
   for (const prop in updateData) {

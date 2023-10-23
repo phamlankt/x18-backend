@@ -9,9 +9,9 @@ import {
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { applicantCreate } from "../services/mongo/applicant.js";
-import { userGetById } from "../services/mongo/users.js";
+import { getUserById } from "../services/mongo/users.js";
 import { roleGetById } from "../services/mongo/roles.js";
-import { jobGetById } from "../services/mongo/jobs.js";
+import { getJobById } from "../services/mongo/jobs.js";
 import { MongoFields } from "../globals/fields/mongo.js";
 
 // Get all  applications
@@ -38,7 +38,7 @@ const create = asyncHandler(async (req, res) => {
     if (!jobId || !documents) throw new Error("Missing required fields");
     const { id } = req.users;
 
-    const user = await userGetById(id);
+    const user = await getUserById(id);
     if (!user) throw new Error("User does not exist!");
     if (user.status !== "active") throw new Error("User is inactive!");
 
@@ -47,7 +47,7 @@ const create = asyncHandler(async (req, res) => {
     if (role.name !== "applicant")
       throw new Error("User must be an applicant in order to apply for a job");
 
-    const job = await jobGetById(jobId);
+    const job = await getJobById(jobId);
     if (!job) throw new Error("Job does not exist");
 
     const application = await applicationGetByApplicantIdAndJobId(id, jobId);
@@ -85,7 +85,7 @@ const cancel = asyncHandler(async (req, res) => {
       throw new Error("Missing required fields");
     const { id } = req.users;
 
-    const user = await userGetById(id);
+    const user = await getUserById(id);
     if (!user) throw new Error("User does not exist!");
     if (user.status !== "active") throw new Error("User is inactive!");
 

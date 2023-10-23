@@ -4,7 +4,7 @@ import { adminUpdateByUserId } from "../services/mongo/admin.js";
 import {
   userGetAllDetailsById,
   userGetByEmail,
-  userGetById,
+  getUserById,
   userUpdateById,
 } from "../services/mongo/users.js";
 import { RESPONSE } from "../globals/api.js";
@@ -42,7 +42,7 @@ export const userChangePassword = async (req, res) => {
   try {
     if (!currentPassword || !password)
       throw new Error("Missing required fields");
-    const existingUser = await userGetById(id, true);
+    const existingUser = await getUserById(id, true);
 
     if (!existingUser) throw new Error("Invalid credentials!");
     const isMatchPassword = await comparePassWord(
