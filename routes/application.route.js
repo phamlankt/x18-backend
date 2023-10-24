@@ -8,7 +8,7 @@ const applicationRouter = express.Router();
 
 applicationRouter.get("/all", jwtCheck, ApplicationController.getAll);
 applicationRouter.get("/all/:jobId", jwtCheck, ApplicationController.getOfJobId);
-applicationRouter.get("/applicants&applications/:jobId", jwtCheck, ApplicationController.getApplicantsAndApplications);
+applicationRouter.get("/applicants/:jobId", jwtCheck, ApplicationController.getApplicantsAndApplications);
 
 applicationRouter.post(
   "/create",

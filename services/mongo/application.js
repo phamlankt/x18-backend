@@ -46,7 +46,22 @@ export const applicationGetOfJobId = async (req) => {
 
   if (applications.length === 0) throw new Error("No posts found");
 
-  return applications;
+  const updatedApplications = await Promise.all(
+    applications.map(async (application) => {
+      const applicant = await ApplicantModel.findOne({
+        userId: application.applicantId,
+      });
+      if (applicant) {
+        return {
+          ...application._doc,
+          applicantName: applicant.fullName,
+        };
+      }
+      return application;
+    })
+  );
+
+  return updatedApplications;
 };
 
 export const applicantsAndApplicationsByJobId = async (req) => {
@@ -58,7 +73,17 @@ export const applicantsAndApplicationsByJobId = async (req) => {
   if (roleName !== "recruiter")
     throw new Error("You must be a recruiter to access this page.");
 
-  const applications = await ApplicationModel.find({ jobId: jobId });
+  const totalCounts = await ApplicationModel.countDocuments({ jobId: jobId });
+  if (totalCounts === 0) throw new Error("No posts found");
+  const currentPage = parseInt(req.query.currentPage) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 5;
+  const offset = (currentPage - 1) * pageSize;
+  const totalPages = Math.ceil(totalCounts / pageSize);
+  const hasNext = currentPage < totalPages;
+
+  const applications = await ApplicationModel.find({ jobId: jobId })
+    .limit(pageSize)
+    .skip(offset);
 
   const applicantIds = applications.map(
     (application) => application.applicantId
@@ -76,7 +101,18 @@ export const applicantsAndApplicationsByJobId = async (req) => {
       application,
     };
   });
-  return combinedData;
+  const result = {
+    data: combinedData,
+    pagination: {
+      currentPage,
+      pageSize,
+      totalCounts,
+      totalPages,
+      hasNext,
+    },
+  };
+
+  return result;
 };
 
 export const applicationCreate = async (data) => {
