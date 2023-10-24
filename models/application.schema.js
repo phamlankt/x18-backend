@@ -18,7 +18,7 @@ const ApplicationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    status: {
+    status: { 
       type: String,
       required: true,
     },

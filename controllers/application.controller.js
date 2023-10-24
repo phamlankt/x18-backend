@@ -1,10 +1,12 @@
 import asyncHandler from "express-async-handler";
 import {
+  applicantsAndApplicationsByJobId,
   applicationCancel,
   applicationCreate,
   applicationGetAll,
   applicationGetByApplicantIdAndJobId,
   applicationGetById,
+  applicationGetOfJobId,
 } from "../services/mongo/application.js";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
@@ -30,6 +32,35 @@ const getAll = asyncHandler(async (req, res) => {
     res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
   }
 });
+
+// Get applications of jobId
+const getOfJobId = asyncHandler(async (req, res) => {
+  try {
+    const applications = await applicationGetOfJobId(req);
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.applicationList]: applications,
+        },
+        "Successfully"
+      )
+    );
+  } catch (error) {
+    res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
+  }
+});
+
+// Get applicants and applications by jobId
+const getApplicantsAndApplications = asyncHandler(async(req, res) => {
+  try {
+    const data = await applicantsAndApplicationsByJobId(req);
+    res.json({
+      data: data,
+    });
+  } catch (error) {
+    res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
+  }
+})
 
 const create = asyncHandler(async (req, res) => {
   try {
@@ -81,8 +112,7 @@ const cancel = asyncHandler(async (req, res) => {
   try {
     const { applicationId } = req.body;
 
-    if (!applicationId)
-      throw new Error("Missing required fields");
+    if (!applicationId) throw new Error("Missing required fields");
     const { id } = req.users;
 
     const user = await getUserById(id);
@@ -101,7 +131,7 @@ const cancel = asyncHandler(async (req, res) => {
 
     const cancelledApplication = await applicationCancel({
       applicationId: applicationId,
-      status:"cancelled"
+      status: "cancelled",
     });
     res.send(
       RESPONSE(
@@ -122,8 +152,10 @@ const cancel = asyncHandler(async (req, res) => {
 
 const ApplicationController = {
   getAll,
+  getOfJobId,
   create,
   cancel,
+  getApplicantsAndApplications,
 };
 
 export default ApplicationController;
