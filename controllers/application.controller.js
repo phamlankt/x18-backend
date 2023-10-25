@@ -1,11 +1,11 @@
 import asyncHandler from "express-async-handler";
 import {
   applicantsAndApplicationsByJobId,
-  applicationCancel,
+  updateApplicationStatusById,
   applicationCreate,
-  applicationGetAll,
+  getAllApplication,
   applicationGetByApplicantIdAndJobId,
-  applicationGetById,
+  getApplicationtById,
   applicationGetOfJobId,
 } from "../services/mongo/application.js";
 import { RESPONSE } from "../globals/api.js";
@@ -19,7 +19,7 @@ import { MongoFields } from "../globals/fields/mongo.js";
 // Get all  applications
 const getAll = asyncHandler(async (req, res) => {
   try {
-    const applications = await applicationGetAll(req);
+    const applications = await getAllApplication(req);
     res.send(
       RESPONSE(
         {
@@ -124,12 +124,12 @@ const cancel = asyncHandler(async (req, res) => {
     if (role.name !== "applicant")
       throw new Error("User must be an applicant in order to cancel a job");
 
-    const existingApplication = await applicationGetById(applicationId);
+    const existingApplication = await getApplicationtById(applicationId);
     if (!existingApplication) throw new Error("Application does not exist");
     if (existingApplication.applicantId !== id)
       throw new Error("User is not allowed to cancel this job!");
 
-    const cancelledApplication = await applicationCancel({
+    const cancelledApplication = await updateApplicationStatusById({
       applicationId: applicationId,
       status: "cancelled",
     });
@@ -150,11 +150,110 @@ const cancel = asyncHandler(async (req, res) => {
   }
 });
 
+const confirm = asyncHandler(async (req, res) => {
+  try {
+    const { jobId,applicationId } = req.body;
+
+    if (!jobId || !applicationId) throw new Error("Missing required fields");
+    const { id } = req.users;
+
+    const user = await getUserById(id);
+    if (!user) throw new Error("User does not exist!");
+    if (user.status !== "active") throw new Error("User is inactive!");
+
+    const role = await roleGetById(user.roleId);
+    if (!role) throw new Error("Role does not exist");
+    if (role.name !== "recruiter")
+      throw new Error("User must be a recruiter in order to confirm a job");
+
+      const existingJob = await getJobById(jobId)
+      if(!existingJob) throw new Error("Job does not exist")
+      console.log("userId",id)
+      console.log("existingJob.creator",existingJob.creator)
+      if(existingJob.creator !==id) throw new Error("Job is not created by this user")
+
+    const existingApplication = await getApplicationtById(applicationId);
+    if (!existingApplication) throw new Error("Application does not exist");
+    if (existingApplication.jobId !== jobId)
+      throw new Error("Could not find corresponding job for this application!");
+
+      if (existingApplication.status !== "sent")
+      throw new Error("Application is not in sent state!");
+
+    const confirmedApplication = await updateApplicationStatusById({
+      applicationId: applicationId,
+      status: "confirmed",
+    });
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.applicationInfo]: confirmedApplication,
+        },
+        "Confirm application successfully"
+      )
+    );
+  } catch (e) {
+    res
+      .status(400)
+      .send(
+        RESPONSE([], "Confirm application unsuccessful", e.errors, e.message)
+      );
+  }
+});
+const reject = asyncHandler(async (req, res) => {
+  try {
+    const { jobId,applicationId } = req.body;
+
+    if (!jobId || !applicationId) throw new Error("Missing required fields");
+    const { id } = req.users;
+
+    const user = await getUserById(id);
+    if (!user) throw new Error("User does not exist!");
+    if (user.status !== "active") throw new Error("User is inactive!");
+
+    const role = await roleGetById(user.roleId);
+    if (!role) throw new Error("Role does not exist");
+    if (role.name !== "recruiter")
+      throw new Error("User must be a recruiter in order to confirm a job");
+
+      const existingJob = await getJobById(jobId)
+      if(!existingJob) throw new Error("Job does not exist")
+      if(existingJob.creator !==id) throw new Error("Job is not created by this user")
+
+    const existingApplication = await getApplicationtById(applicationId);
+    if (!existingApplication) throw new Error("Application does not exist");
+    if (existingApplication.jobId !== jobId)
+      throw new Error("Could not find corresponding job for this application!");
+      if (existingApplication.status !== "sent")
+      throw new Error("Application is not in sent state!");
+    
+    const rejectedApplication = await updateApplicationStatusById({
+      applicationId: applicationId,
+      status: "rejected",
+    });
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.applicationInfo]: rejectedApplication,
+        },
+        "Reject application successfully"
+      )
+    );
+  } catch (e) {
+    res
+      .status(400)
+      .send(
+        RESPONSE([], "Reject application unsuccessful", e.errors, e.message)
+      );
+  }
+});
 const ApplicationController = {
   getAll,
   getOfJobId,
   create,
   cancel,
+  confirm,
+  reject,
   getApplicantsAndApplications,
 };
 

@@ -1,7 +1,7 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
-import { ApplicantModel, ApplicationModel } from "../../globals/mongodb.js";
+import { ApplicantModel, ApplicationModel, JobModel } from "../../globals/mongodb.js";
 
-export const applicationGetAll = async (req) => {
+export const getAllApplication = async (req) => {
   const { id, roleName } = req.users;
   if (roleName !== "applicant")
     throw new Error("You must be an applicant to access this page.");
@@ -16,12 +16,25 @@ export const applicationGetAll = async (req) => {
   const totalPages = Math.ceil(totalCounts / pageSize);
   const hasNext = currentPage < totalPages;
 
-  const appications = await ApplicationModel.find({ applicantId: id })
+  const applications = await ApplicationModel.find({ applicantId: id })
     .limit(pageSize)
     .skip(offset);
 
+  const applicationsWithJobs = [];
+
+  for (const application of applications) {
+    const job = await JobModel.findById(application.jobId);
+
+    const applicationWithJob = {
+      ...application._doc, 
+      job: job, 
+    };
+
+    applicationsWithJobs.push(applicationWithJob);
+  }
+
   const result = {
-    data: appications,
+    data: applicationsWithJobs,
     pagination: {
       currentPage,
       pageSize,
@@ -129,16 +142,16 @@ export const applicationCreate = async (data) => {
   return await applicationDoc.save();
 };
 
-export const applicationCancel = async (data) => {
+export const updateApplicationStatusById = async (data) => {
   const { applicationId, status } = data;
-  const existingApplication = await applicationGetById(applicationId);
+  const existingApplication = await getApplicationtById(applicationId);
   if (!existingApplication) throw new Error("Application does not exist!");
   if (status) existingApplication.status = status;
 
   return await existingApplication.save();
 };
 
-export const applicationGetById = async (id) => {
+export const getApplicationtById = async (id) => {
   return await ApplicationModel.findOne({ [MongoFields.id]: id });
 };
 
