@@ -17,5 +17,7 @@ applicationRouter.post(
   ApplicationController.create
 );
 applicationRouter.post("/cancel", jwtCheck, ApplicationController.cancel);
+applicationRouter.post("/confirm", jwtCheck, ApplicationController.confirm);
+applicationRouter.post("/reject", jwtCheck, ApplicationController.reject);
 
 export default applicationRouter;
