@@ -29,3 +29,11 @@ export const validationProfileMdw = () => async (req, res, next) => {
     res.status(400).json({ message: error.errors.join(", ") });
   }
 };
+
+export const parseFormDataToBody = (req, res, next) => {
+  const body = JSON.parse(JSON.stringify(req.body)); // req.body = [Object: null prototype] { title: 'product' }
+  if (body) {
+    req.body = body;
+    next();
+  }
+};

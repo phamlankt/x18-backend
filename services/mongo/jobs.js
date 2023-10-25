@@ -1,6 +1,9 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
 import { JobModel } from "../../globals/mongodb.js";
-import { checkIfUserExists, checkIfUserIsActive } from "../../utils/userUtils.js";
+import {
+  checkIfUserExists,
+  checkIfUserIsActive,
+} from "../../utils/userUtils.js";
 import { calculatePagination } from "../../utils/paginationUtils.js";
 
 export const getActiveJobByQuery = async (query) => {
@@ -66,18 +69,24 @@ export const getActiveJobByQuery = async (query) => {
   return { jobs, pagination };
 };
 
-//Get all jobs for loggin in users 
+//Get all jobs for loggin in users
 export const getAllJobs = async (user, query, currentPage, pageSize) => {
-  let { search, sectors, location, status} = query;
+  let { search, sectors, location, status } = query;
   const userID = user.id;
   const userRole = user.roleName;
   const userExists = checkIfUserExists(userID);
-  if (!userExists) {throw new Error('User does not exist')};
+  if (!userExists) {
+    throw new Error("User does not exist");
+  }
 
   const userIsActive = checkIfUserIsActive(userID);
-  if (!userIsActive) {throw new Error('User is not active');}
+  if (!userIsActive) {
+    throw new Error("User is not active");
+  }
 
-  if (userRole === 'applicant') {throw new Error('Unauthorized');}
+  if (userRole === "applicant") {
+    throw new Error("Unauthorized");
+  }
 
   let jobQuery = {};
 
@@ -99,12 +108,12 @@ export const getAllJobs = async (user, query, currentPage, pageSize) => {
       .map((location) => new RegExp(`^${location}$`, "i"));
     jobQuery.city = { $in: locationArray };
   }
-  
+
   if (sectors) {
     const sectorsArray = sectors
       .split("%")
       .map((sector) => new RegExp(`^${sector}$`, "i"));
-  
+
     jobQuery.sectors = {
       $elemMatch: {
         $in: sectorsArray,
@@ -137,9 +146,13 @@ export const getAllActiveJobs = async (user, currentPage, pageSize) => {
   const userID = user.id;
   const userRole = user.roleName;
   const userExists = checkIfUserExists(userID);
-  if (!userExists) {throw new Error('User does not exist')};
+  if (!userExists) {
+    throw new Error("User does not exist");
+  }
   const userIsActive = checkIfUserIsActive(userID);
-  if (!userIsActive) {throw new Error('User is not active');}
+  if (!userIsActive) {
+    throw new Error("User is not active");
+  }
 
   let jobQuery = { status: { $in: ["open", "extended"] } };
 
@@ -149,12 +162,11 @@ export const getAllActiveJobs = async (user, currentPage, pageSize) => {
   currentPage = currentPage || 1;
   const offset = (currentPage - 1) * pageSize;
   const pagination = await calculatePagination(jobQuery, currentPage, pageSize);
-  
+
   const jobs = await JobModel.find(jobQuery)
     .sort({ _id: -1 })
     .limit(pageSize)
     .skip(offset);
-
 
   return {
     data: jobs,
@@ -167,33 +179,27 @@ export const getAllActiveJobs = async (user, currentPage, pageSize) => {
 };
 
 export const createJob = async (data) => {
-  const {
-    title,
-    deadline,
-    creator,
-    sectors,
-    salary,
-    location,
-    city,
-    position,
-    amount,
-    description,
-    status,
-  } = data;
+  if (
+    !data.title ||
+    !data.deadline ||
+    !data.creator ||
+    !data.sectors ||
+    !data.salary ||
+    !data.location ||
+    !data.city ||
+    !data.position ||
+    !data.description ||
+    !data.companyLogo
+  ) {
+    throw new Error("Missing required fields to create job");
+  }
 
-  const jobDoc = new JobModel({
-    title: title,
-    deadline: deadline,
-    creator: creator,
-    sectors: sectors,
-    salary: salary,
-    location: location,
-    city: city,
-    position: position,
-    amount: amount,
-    description: description,
-    status: status,
-  });
+  data.deadline = new Date(data.deadline);
+  data.amount = Number(data.amount) || 0;
+  data.status = "open";
+  data.sectors = data.sectors.split(",");
+
+  const jobDoc = new JobModel(data);
 
   return await jobDoc.save();
 };
@@ -213,8 +219,10 @@ export const removeJobById = async (data) => {
 
 export const updateJobById = async (jobId, updateData) => {
   const existingJob = await getJobById(jobId);
-  
-  if (!existingJob) {throw new Error("Job does not exist!");}
+
+  if (!existingJob) {
+    throw new Error("Job does not exist!");
+  }
   for (const prop in updateData) {
     if (updateData.hasOwnProperty(prop)) {
       existingJob[prop] = updateData[prop];

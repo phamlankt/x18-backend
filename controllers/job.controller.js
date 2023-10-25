@@ -12,6 +12,7 @@ import { ResponseFields } from "../globals/fields/response.js";
 import { RESPONSE } from "../globals/api.js";
 import { getUserById } from "../services/mongo/users.js";
 import { roleGetById } from "../services/mongo/roles.js";
+import { uploadStream } from "../middlewares/multer.js";
 
 // Get all  jobs
 const getAll = asyncHandler(async (req, res) => {
@@ -21,11 +22,9 @@ const getAll = asyncHandler(async (req, res) => {
   res.send(RESPONSE({ [ResponseFields.jobs]: jobs }, "Successfully"));
 });
 
-
 const getById = asyncHandler(async (req, res) => {
   try {
-   
-   const jobId = req.params.jobId
+    const jobId = req.params.jobId;
 
     const existingJob = await getJobById(jobId);
 
@@ -52,64 +51,44 @@ const getBySearchAndFilter = asyncHandler(async (req, res) => {
 });
 
 const create = asyncHandler(async (req, res) => {
-  try {
-    const {
-      title,
-      deadline,
-      sectors,
-      salary,
-      location,
-      city,
-      position,
-      amount,
-      description,
-    } = req.body;
+  const data = req.body;
+  const { id } = req.users;
 
-    const { id } = req.users;
+  const user = await getUserById(id);
+  if (!user) throw new Error("User does not exist!");
+  if (user.status !== "active") throw new Error("User is inactive!");
 
-    const user = await getUserById(id);
-    if (!user) throw new Error("User does not exist!");
-    if (user.status !== "active") throw new Error("User is inactive!");
+  const role = await roleGetById(user.roleId);
+  if (!role) throw new Error("Role does not exist!");
+  if (role.name !== "recruiter")
+    throw new Error("User must be a recruiter in order to create a job");
 
-    const role = await roleGetById(user.roleId);
-    if (!role) throw new Error("Role does not exist!");
-    if (role.name !== "recruiter")
-      throw new Error("User must be a recruiter in order to create a job");
+  const src = await uploadStream(req.file.buffer);
+  data.companyLogo = src.secure_url;
 
-    const newJob = await createJob({
-      title,
-      deadline: new Date(deadline),
-      creator: id,
-      sectors,
-      salary,
-      location,
-      city,
-      position,
-      amount: Number(amount),
-      description,
-      status: "open",
-    });
+  const newJob = await createJob({
+    ...data,
+    deadline: new Date(data.deadline),
+    creator: id,
+    amount: Number(data.amount) || 0,
+    status: "open",
+  });
 
-    res.send(
-      RESPONSE(
-        {
-          [ResponseFields.jobInfo]: newJob,
-        },
-        "Create new job successfully"
-      )
-    );
-  } catch (e) {
-    res
-      .status(400)
-      .send(RESPONSE([], "Create job unsuccessful", e.errors, e.message));
-  }
+  res.send(
+    RESPONSE(
+      {
+        [ResponseFields.jobInfo]: newJob,
+      },
+      "Create new job successfully"
+    )
+  );
 });
 
 const update = asyncHandler(async (req, res) => {
   try {
-    const jobId = req.params.jobId; 
+    const jobId = req.params.jobId;
     const { id } = req.users;
-    const updateData = req.body; 
+    const updateData = req.body;
 
     const user = await getUserById(id);
     if (!user) throw new Error("User does not exist!");
@@ -140,12 +119,13 @@ const update = asyncHandler(async (req, res) => {
       )
     );
   } catch (error) {
-    res.status(400).send(
-      RESPONSE([], "Update job unsuccessfully", error.errors, error.message)
-    );
+    res
+      .status(400)
+      .send(
+        RESPONSE([], "Update job unsuccessfully", error.errors, error.message)
+      );
   }
 });
-
 
 const remove = asyncHandler(async (req, res) => {
   try {
@@ -205,7 +185,7 @@ const JobController = {
   getActiveJobs,
   create,
   remove,
-  update
+  update,
 };
 
 export default JobController;

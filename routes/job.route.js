@@ -2,8 +2,12 @@ import express from "express";
 import JobController from "../controllers/job.controller.js";
 import { checkQuery } from "../middlewares/checkQuery.middleware.js";
 import { jobSchema } from "../validations/job.validation.js";
-import { validationMdw } from "../middlewares/validate.middleware.js";
+import {
+  parseFormDataToBody,
+  validationMdw,
+} from "../middlewares/validate.middleware.js";
 import { jwtCheck } from "../middlewares/jwt.js";
+import { uploadFile } from "../middlewares/multer.js";
 
 const jobRouter = express.Router();
 
@@ -15,7 +19,7 @@ const acceptedQueryParams = [
   "currentPage",
   "pageSize",
   "location",
-  "status"
+  "status",
 ];
 
 jobRouter.get(
@@ -28,6 +32,8 @@ jobRouter.get(
 jobRouter.get("/details/:jobId", JobController.getById);
 jobRouter.post(
   "/create",
+  uploadFile.single("companyLogo"),
+  parseFormDataToBody,
   validationMdw(jobSchema),
   jwtCheck,
   JobController.create
