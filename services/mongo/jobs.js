@@ -224,7 +224,7 @@ export const updateJobById = async (jobId, updateData) => {
     throw new Error("Job does not exist!");
   }
   for (const prop in updateData) {
-    if (updateData.hasOwnProperty(prop)) {
+    if (existingJob.hasOwnProperty(prop)) {
       existingJob[prop] = updateData[prop];
     }
   }
