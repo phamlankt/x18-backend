@@ -1,5 +1,5 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
-import { ApplicantModel, ApplicationModel } from "../../globals/mongodb.js";
+import { ApplicantModel, ApplicationModel, JobModel } from "../../globals/mongodb.js";
 
 export const getAllApplication = async (req) => {
   const { id, roleName } = req.users;
@@ -15,13 +15,26 @@ export const getAllApplication = async (req) => {
   });
   const totalPages = Math.ceil(totalCounts / pageSize);
   const hasNext = currentPage < totalPages;
-console.log("applicantId",id)
-  const appications = await ApplicationModel.find({ applicantId: id })
+
+  const applications = await ApplicationModel.find({ applicantId: id })
     .limit(pageSize)
     .skip(offset);
 
+  const applicationsWithJobs = [];
+
+  for (const application of applications) {
+    const job = await JobModel.findById(application.jobId);
+
+    const applicationWithJob = {
+      ...application._doc, 
+      job: job, 
+    };
+
+    applicationsWithJobs.push(applicationWithJob);
+  }
+
   const result = {
-    data: appications,
+    data: applicationsWithJobs,
     pagination: {
       currentPage,
       pageSize,
