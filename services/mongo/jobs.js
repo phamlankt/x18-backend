@@ -5,7 +5,7 @@ import {
   checkIfUserIsActive,
 } from "../../utils/userUtils.js";
 import { calculatePagination } from "../../utils/paginationUtils.js";
-
+import mongoose from "mongoose";
 export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
     query;
@@ -204,7 +204,7 @@ export const createJob = async (data) => {
   return await jobDoc.save();
 };
 
-export const getJobById = async (id) => {
+export const getJobById = async (id, res) => {
   return await JobModel.findOne({ [MongoFields.id]: id });
 };
 
