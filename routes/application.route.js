@@ -8,6 +8,7 @@ const applicationRouter = express.Router();
 
 applicationRouter.get("/all", jwtCheck, ApplicationController.getAll);
 applicationRouter.get("/all/:jobId", jwtCheck, ApplicationController.getOfJobId);
+applicationRouter.get("/applicant/:jobId", jwtCheck, ApplicationController.getApplicationByJobIdForApplicant);
 applicationRouter.get("/applicants/:jobId", jwtCheck, ApplicationController.getApplicantsAndApplications);
 
 applicationRouter.post(
