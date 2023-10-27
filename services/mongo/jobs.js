@@ -205,6 +205,8 @@ export const createJob = async (data) => {
 };
 
 export const getJobById = async (id, res) => {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new Error("JobId does not exist");
   return await JobModel.findOne({ [MongoFields.id]: id });
 };
 
