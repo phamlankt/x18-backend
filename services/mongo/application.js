@@ -7,6 +7,7 @@ import {
 import { applicantGetByUserId } from "./applicant.js";
 import { getJobById } from "./jobs.js";
 import { userGetAllDetailsById } from "./users.js";
+import mongoose  from "mongoose";
 
 export const getAllApplication = async (req) => {
   const { id } = req.users;
@@ -93,7 +94,8 @@ export const applicationGetOfJobId = async (req) => {
 export const getApplicationByJobIdAndApplicantId = async (req) => {
   const { id } = req.users;
   const jobId = req.params.jobId;
-
+  if (!mongoose.Types.ObjectId.isValid(jobId))
+    throw new Error("JobId does not exist");
   const existingJob = getJobById(jobId);
   if (!existingJob) throw new Error("Job does not exist!");
 
