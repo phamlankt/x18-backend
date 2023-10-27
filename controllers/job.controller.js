@@ -13,6 +13,7 @@ import { RESPONSE } from "../globals/api.js";
 import { getUserById } from "../services/mongo/users.js";
 import { roleGetById } from "../services/mongo/roles.js";
 import { uploadStream } from "../middlewares/multer.js";
+import mongoose from "mongoose";
 
 // Get all  jobs
 const getAll = asyncHandler(async (req, res) => {
@@ -25,17 +26,28 @@ const getAll = asyncHandler(async (req, res) => {
 const getById = asyncHandler(async (req, res) => {
   try {
     const jobId = req.params.jobId;
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      res.send(
+        RESPONSE(
+          {
+            [ResponseFields.jobInfo]: null,
+          },
+          "Get job successfully"
+        )
+      );
+    } else {
+      const existingJob = await getJobById(jobId);
 
-    const existingJob = await getJobById(jobId);
-
-    res.send(
-      RESPONSE(
-        {
-          [ResponseFields.jobInfo]: existingJob,
-        },
-        "Get job successfully"
-      )
-    );
+      if (existingJob)
+        res.send(
+          RESPONSE(
+            {
+              [ResponseFields.jobInfo]: existingJob,
+            },
+            "Get job successfully"
+          )
+        );
+    }
   } catch (e) {
     res
       .status(400)

@@ -100,7 +100,7 @@ export const applicantsAndApplicationsByJobId = async (req) => {
     throw new Error("You must be a recruiter to access this page.");
 
   const totalCounts = await ApplicationModel.countDocuments({ jobId: jobId });
-  if (totalCounts === 0) throw new Error("No posts found");
+  if (totalCounts === 0) throw new Error("No application found");
   const currentPage = parseInt(req.query.currentPage) || 1;
   const pageSize = parseInt(req.query.pageSize) || 5;
   const offset = (currentPage - 1) * pageSize;
