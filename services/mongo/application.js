@@ -1,9 +1,16 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
 import { ApplicantModel, ApplicationModel, JobModel } from "../../globals/mongodb.js";
+import { applicantGetByUserId } from "./applicant.js";
+import { userGetAllDetailsById } from "./users.js";
 
 export const getAllApplication = async (req) => {
-  const { id, roleName } = req.users;
-  if (roleName !== "applicant")
+  const { id } = req.users;
+  const existingUser = await userGetAllDetailsById(id);
+
+  if(!existingUser)
+  throw new Error("User Does not exist");
+  
+  if (existingUser.roleName !== "applicant")
     throw new Error("You must be an applicant to access this page.");
 
   const currentPage = parseInt(req.query.currentPage) || 1;
@@ -47,12 +54,15 @@ export const getAllApplication = async (req) => {
 };
 
 export const applicationGetOfJobId = async (req) => {
-  const { id, roleName } = req.users;
+  const { id } = req.users;
   const jobId = req.params.jobId;
 
-  if (!id) throw new Error("User does not exist.");
+  const existingUser = await userGetAllDetailsById(id);
 
-  if (roleName !== "recruiter")
+  if(!existingUser)
+  throw new Error("User Does not exist");
+  
+  if (existingUser.roleName !== "recruiter")
     throw new Error("You must be a recruiter to access this page.");
 
   const applications = await ApplicationModel.find({ jobId: jobId });
@@ -81,9 +91,12 @@ export const applicantsAndApplicationsByJobId = async (req) => {
   const { id, roleName } = req.users;
   const jobId = req.params.jobId;
 
-  if (!id) throw new Error("User does not exist.");
+  const existingUser = await userGetAllDetailsById(id);
 
-  if (roleName !== "recruiter")
+  if(!existingUser)
+  throw new Error("User Does not exist");
+  
+  if (existingUser.roleName !== "recruiter")
     throw new Error("You must be a recruiter to access this page.");
 
   const totalCounts = await ApplicationModel.countDocuments({ jobId: jobId });
