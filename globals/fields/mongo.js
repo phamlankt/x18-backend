@@ -6,6 +6,7 @@ const MongoFields = {
   updatedAt: "updatedAt",
 
   applicantId:"applicantId",
+  applicationStatus:["sent","cancelled","confirmed","rejected"],
   jobId:"jobId",
 
   roleName: "name",
