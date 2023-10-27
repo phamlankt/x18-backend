@@ -28,7 +28,7 @@ const getAll = asyncHandler(async (req, res) => {
         "Successfully"
       )
     );
-  } catch (error) {
+  } catch (e) {
     res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
   }
 });
@@ -45,7 +45,7 @@ const getOfJobId = asyncHandler(async (req, res) => {
         "Successfully"
       )
     );
-  } catch (error) {
+  } catch (e) {
     res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
   }
 });
@@ -57,7 +57,7 @@ const getApplicantsAndApplications = asyncHandler(async(req, res) => {
     res.json({
       data: data,
     });
-  } catch (error) {
+  } catch (e) {
     res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
   }
 })
