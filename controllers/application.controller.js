@@ -7,6 +7,7 @@ import {
   applicationGetByApplicantIdAndJobId,
   getApplicationtById,
   applicationGetOfJobId,
+  getApplicationByJobIdAndApplicantId,
 } from "../services/mongo/application.js";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
@@ -57,6 +58,22 @@ const getApplicantsAndApplications = asyncHandler(async (req, res) => {
     res.json({
       data: data,
     });
+  } catch (e) {
+    res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
+  }
+});
+
+const getApplicationByJobIdForApplicant = asyncHandler(async (req, res) => {
+  try {
+    const application = await getApplicationByJobIdAndApplicantId(req);
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.applicationInfo]: application,
+        },
+        "Get application by JobId successfully"
+      )
+    );
   } catch (e) {
     res.status(400).send(RESPONSE([], "Unsuccessful", e.error, e.message));
   }
@@ -200,7 +217,12 @@ const updatStatusByRecruiter = asyncHandler(async (req, res) => {
     res
       .status(400)
       .send(
-        RESPONSE([], "Change application status unsuccessful", e.errors, e.message)
+        RESPONSE(
+          [],
+          "Change application status unsuccessful",
+          e.errors,
+          e.message
+        )
       );
   }
 });
@@ -212,6 +234,7 @@ const ApplicationController = {
   cancel,
   updatStatusByRecruiter,
   getApplicantsAndApplications,
+  getApplicationByJobIdForApplicant,
 };
 
 export default ApplicationController;

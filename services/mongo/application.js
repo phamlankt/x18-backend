@@ -1,15 +1,20 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
-import { ApplicantModel, ApplicationModel, JobModel } from "../../globals/mongodb.js";
+import {
+  ApplicantModel,
+  ApplicationModel,
+  JobModel,
+} from "../../globals/mongodb.js";
 import { applicantGetByUserId } from "./applicant.js";
+import { getJobById } from "./jobs.js";
 import { userGetAllDetailsById } from "./users.js";
+import mongoose  from "mongoose";
 
 export const getAllApplication = async (req) => {
   const { id } = req.users;
   const existingUser = await userGetAllDetailsById(id);
 
-  if(!existingUser)
-  throw new Error("User Does not exist");
-  
+  if (!existingUser) throw new Error("User Does not exist");
+
   if (existingUser.roleName !== "applicant")
     throw new Error("You must be an applicant to access this page.");
 
@@ -33,8 +38,8 @@ export const getAllApplication = async (req) => {
     const job = await JobModel.findById(application.jobId);
 
     const applicationWithJob = {
-      ...application._doc, 
-      job: job, 
+      ...application._doc,
+      job: job,
     };
 
     applicationsWithJobs.push(applicationWithJob);
@@ -59,15 +64,14 @@ export const applicationGetOfJobId = async (req) => {
 
   const existingUser = await userGetAllDetailsById(id);
 
-  if(!existingUser)
-  throw new Error("User Does not exist");
-  
+  if (!existingUser) throw new Error("User Does not exist");
+
   if (existingUser.roleName !== "recruiter")
     throw new Error("You must be a recruiter to access this page.");
 
   const applications = await ApplicationModel.find({ jobId: jobId });
 
-  if (applications.length === 0) throw new Error("No posts found");
+  if (applications.length === 0) throw new Error("No job found");
 
   const updatedApplications = await Promise.all(
     applications.map(async (application) => {
@@ -87,20 +91,43 @@ export const applicationGetOfJobId = async (req) => {
   return updatedApplications;
 };
 
+export const getApplicationByJobIdAndApplicantId = async (req) => {
+  const { id } = req.users;
+  const jobId = req.params.jobId;
+  if (!mongoose.Types.ObjectId.isValid(jobId))
+    throw new Error("JobId does not exist");
+  const existingJob = getJobById(jobId);
+  if (!existingJob) throw new Error("Job does not exist!");
+
+  const existingUser = await userGetAllDetailsById(id);
+  if (!existingUser) throw new Error("User does not exist");
+
+  if (existingUser.roleName !== "applicant")
+    throw new Error("You must be an applicant to get application!");
+
+  const application = await ApplicationModel.findOne({
+    [MongoFields.jobId]: jobId,
+    [MongoFields.applicantId]: id,
+  });
+
+  if (!application) throw new Error("Applicant did not apply to this job yet!");
+
+  return application;
+};
+
 export const applicantsAndApplicationsByJobId = async (req) => {
   const { id, roleName } = req.users;
   const jobId = req.params.jobId;
 
   const existingUser = await userGetAllDetailsById(id);
 
-  if(!existingUser)
-  throw new Error("User Does not exist");
-  
+  if (!existingUser) throw new Error("User Does not exist");
+
   if (existingUser.roleName !== "recruiter")
     throw new Error("You must be a recruiter to access this page.");
 
   const totalCounts = await ApplicationModel.countDocuments({ jobId: jobId });
-  if (totalCounts === 0) throw new Error("No posts found");
+  if (totalCounts === 0) throw new Error("No application found");
   const currentPage = parseInt(req.query.currentPage) || 1;
   const pageSize = parseInt(req.query.pageSize) || 5;
   const offset = (currentPage - 1) * pageSize;

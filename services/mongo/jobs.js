@@ -5,7 +5,7 @@ import {
   checkIfUserIsActive,
 } from "../../utils/userUtils.js";
 import { calculatePagination } from "../../utils/paginationUtils.js";
-
+import mongoose from "mongoose";
 export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
     query;
@@ -82,6 +82,7 @@ export const getActiveJobByQuery = async (query) => {
 
   return { jobs: jobsWithCreator, pagination };
 };
+import { ApplicationModel } from "../../globals/mongodb.js";
 
 //Get all jobs for loggin in users
 export const getAllJobs = async (user, query, currentPage, pageSize) => {
@@ -105,7 +106,7 @@ export const getAllJobs = async (user, query, currentPage, pageSize) => {
   let jobQuery = {};
 
   if (userRole === "recruiter") {
-    jobQuery.recruiterId = user.userID;
+    jobQuery.creator = userID;
   }
 
   if (search) {
@@ -145,8 +146,24 @@ export const getAllJobs = async (user, query, currentPage, pageSize) => {
     .limit(pageSize)
     .skip(offset);
 
+    const jobsWithApplicationsCount = await Promise.all(
+      jobs.map(async (job) => {
+        const allApplicationsCount = await ApplicationModel.countDocuments({ jobId: job._id });
+        const validApplicationsCount = await ApplicationModel.countDocuments({ 
+          jobId: job._id,
+          status: { $in: ['confirmed', 'sent'] }
+        });
+    
+        return { 
+          ...job.toObject(), 
+          allApplicationsCount, 
+          validApplicationsCount 
+        };
+      })
+    );
+
   return {
-    data: jobs,
+    data: jobsWithApplicationsCount,
     hasnext: pagination.hasNext,
     currentPage,
     pageSize: pagination.pageSize,
@@ -171,7 +188,7 @@ export const getAllActiveJobs = async (user, currentPage, pageSize) => {
   let jobQuery = { status: { $in: ["open", "extended"] } };
 
   if (userRole === "recruiter") {
-    jobQuery.recruiterId = user.userID;
+    jobQuery.creator = userID;
   }
   currentPage = currentPage || 1;
   const offset = (currentPage - 1) * pageSize;
@@ -218,7 +235,9 @@ export const createJob = async (data) => {
   return await jobDoc.save();
 };
 
-export const getJobById = async (id) => {
+export const getJobById = async (id, res) => {
+  if (!mongoose.Types.ObjectId.isValid(id))
+    throw new Error("JobId does not exist");
   return await JobModel.findOne({ [MongoFields.id]: id });
 };
 
