@@ -3,11 +3,12 @@ import {
   ApplicantModel,
   ApplicationModel,
   JobModel,
+  RecruiterModel,
 } from "../../globals/mongodb.js";
 import { applicantGetByUserId } from "./applicant.js";
 import { getJobById } from "./jobs.js";
 import { userGetAllDetailsById } from "./users.js";
-import mongoose  from "mongoose";
+import mongoose from "mongoose";
 
 export const getAllApplication = async (req) => {
   const { id } = req.users;
@@ -36,10 +37,17 @@ export const getAllApplication = async (req) => {
 
   for (const application of applications) {
     const job = await JobModel.findById(application.jobId);
+    if (job.length === 0) throw new Error("No Job found");
+
+    const recruiter = await RecruiterModel.find({ userId: job.creator });
+    if (recruiter.length === 0) throw new Error("No recruiter found");
+
+    const avatarUrl = recruiter[0].avatarUrl;
 
     const applicationWithJob = {
       ...application._doc,
       job: job,
+      companyLogo: avatarUrl,
     };
 
     applicationsWithJobs.push(applicationWithJob);
