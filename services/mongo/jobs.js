@@ -1,5 +1,5 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
-import { JobModel } from "../../globals/mongodb.js";
+import { JobModel, RecruiterModel } from "../../globals/mongodb.js";
 import {
   checkIfUserExists,
   checkIfUserIsActive,
@@ -9,6 +9,7 @@ import { calculatePagination } from "../../utils/paginationUtils.js";
 export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
     query;
+
   const offset = (currentPage - 1) * pageSize || 0;
   const sortFieldValue = sortField || "createdAt";
   let sortByValue = sortBy === "asc" && sortBy ? 1 : -1;
@@ -18,7 +19,7 @@ export const getActiveJobByQuery = async (query) => {
     currentPage = 1;
   }
   if (!pageSize || isNaN(pageSize) || pageSize < 1) {
-    pageSize = 0;
+    pageSize = 10;
   }
 
   if (search) {
@@ -50,6 +51,7 @@ export const getActiveJobByQuery = async (query) => {
         totalJobCount,
         isNext: false,
         offset,
+        pageSize,
       },
     };
   }
@@ -59,14 +61,26 @@ export const getActiveJobByQuery = async (query) => {
     .limit(pageSize)
     .skip(offset);
 
+  const creators = await RecruiterModel.find({
+    userId: { $in: jobs.map((job) => job.creator) },
+  });
+
+  const jobsWithCreator = creators.length
+    ? jobs.map((job) => {
+        const creator = creators?.find((c) => c.userId === job.creator);
+        return { ...job.toObject(), creator };
+      })
+    : jobs;
+
   const isNext = totalJobCount > offset + jobs.length;
   const pagination = {
     totalJobCount,
     isNext,
     offset,
+    pageSize,
   };
 
-  return { jobs, pagination };
+  return { jobs: jobsWithCreator, pagination };
 };
 
 //Get all jobs for loggin in users
