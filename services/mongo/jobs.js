@@ -91,7 +91,7 @@ export const getAllJobs = async (user, query, currentPage, pageSize) => {
   let jobQuery = {};
 
   if (userRole === "recruiter") {
-    jobQuery.recruiterId = user.userID;
+    jobQuery.creator = userID;
   }
 
   if (search) {
