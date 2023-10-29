@@ -3,11 +3,12 @@ import {
   ApplicantModel,
   ApplicationModel,
   JobModel,
+  RecruiterModel,
 } from "../../globals/mongodb.js";
 import { applicantGetByUserId } from "./applicant.js";
 import { getJobById } from "./jobs.js";
 import { userGetAllDetailsById } from "./users.js";
-import mongoose  from "mongoose";
+import mongoose from "mongoose";
 
 export const getAllApplication = async (req) => {
   const { id } = req.users;
@@ -35,11 +36,15 @@ export const getAllApplication = async (req) => {
   const applicationsWithJobs = [];
 
   for (const application of applications) {
-    const job = await JobModel.findById(application.jobId);
+    const job = await JobModel.findById(application.jobId).select(
+      "-companyLogo"
+    );
+    const recruiter = await RecruiterModel.findOne({ userId: job.creator });
 
     const applicationWithJob = {
       ...application._doc,
       job: job,
+      companyAvatarUrl: recruiter.avatarUrl,
     };
 
     applicationsWithJobs.push(applicationWithJob);
