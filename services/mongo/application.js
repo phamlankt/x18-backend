@@ -36,18 +36,15 @@ export const getAllApplication = async (req) => {
   const applicationsWithJobs = [];
 
   for (const application of applications) {
-    const job = await JobModel.findById(application.jobId);
-    if (job.length === 0) throw new Error("No Job found");
-
-    const recruiter = await RecruiterModel.find({ userId: job.creator });
-    if (recruiter.length === 0) throw new Error("No recruiter found");
-
-    const avatarUrl = recruiter[0].avatarUrl;
+    const job = await JobModel.findById(application.jobId).select(
+      "-companyLogo"
+    );
+    const recruiter = await RecruiterModel.findOne({ userId: job.creator });
 
     const applicationWithJob = {
       ...application._doc,
       job: job,
-      companyLogo: avatarUrl,
+      companyAvatarUrl: recruiter.avatarUrl,
     };
 
     applicationsWithJobs.push(applicationWithJob);
