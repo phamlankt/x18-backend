@@ -9,6 +9,8 @@ import {
   checkIfUserIsActive,
 } from "../../utils/userUtils.js";
 import { calculatePagination } from "../../utils/paginationUtils.js";
+import { getUserById } from "./users.js";
+import { roleGetById } from "./roles.js";
 import mongoose from "mongoose";
 export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
@@ -86,9 +88,6 @@ export const getActiveJobByQuery = async (query) => {
 
   return { jobs: jobsWithCreator, pagination };
 };
-import { ApplicationModel } from "../../globals/mongodb.js";
-import { getUserById } from "./users.js";
-import { roleGetById } from "./roles.js";
 
 //Get all jobs for loggin in users
 export const getAllJobs = async (user, query, currentPage, pageSize) => {
