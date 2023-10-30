@@ -66,24 +66,9 @@ const create = asyncHandler(async (req, res) => {
   const data = req.body;
   const { id } = req.users;
 
-  const user = await getUserById(id);
-  if (!user) throw new Error("User does not exist!");
-  if (user.status !== "active") throw new Error("User is inactive!");
-
-  const role = await roleGetById(user.roleId);
-  if (!role) throw new Error("Role does not exist!");
-  if (role.name !== "recruiter")
-    throw new Error("User must be a recruiter in order to create a job");
-
-  const src = await uploadStream(req.file.buffer);
-  data.companyLogo = src.secure_url;
-
   const newJob = await createJob({
-    ...data,
-    deadline: new Date(data.deadline),
-    creator: id,
-    amount: Number(data.amount) || 0,
-    status: "open",
+    data,
+    userId: id,
   });
 
   res.send(
@@ -97,46 +82,19 @@ const create = asyncHandler(async (req, res) => {
 });
 
 const update = asyncHandler(async (req, res) => {
-  try {
-    const jobId = req.params.jobId;
-    const { id } = req.users;
-    const updateData = req.body;
+  const jobId = req.params.jobId;
+  const { id } = req.users;
+  const updateData = req.body;
 
-    const user = await getUserById(id);
-    if (!user) throw new Error("User does not exist!");
-    if (user.status !== "active") throw new Error("User is inactive!");
-
-    const role = await roleGetById(user.roleId);
-    if (!role) throw new Error("Role does not exist!");
-
-    if (role.name !== "recruiter")
-      throw new Error(
-        "User must be a recruiter in order to update their created job"
-      );
-
-    const currentJob = await getJobById(jobId);
-    if (!currentJob) throw new Error("Job does not exist!");
-    if (currentJob.creator !== id)
-      throw new Error(
-        "User is not the owner of this job, hence is not allowed to update this job"
-      );
-
-    const updatedJob = await updateJobById(jobId, updateData);
-    res.send(
-      RESPONSE(
-        {
-          [ResponseFields.jobInfo]: updatedJob,
-        },
-        "Update job successfully"
-      )
-    );
-  } catch (error) {
-    res
-      .status(400)
-      .send(
-        RESPONSE([], "Update job unsuccessfully", error.errors, error.message)
-      );
-  }
+  const updatedJob = await updateJobById({ jobId, updateData, userId: id });
+  res.send(
+    RESPONSE(
+      {
+        [ResponseFields.jobInfo]: updatedJob,
+      },
+      "Update job successfully"
+    )
+  );
 });
 
 const remove = asyncHandler(async (req, res) => {

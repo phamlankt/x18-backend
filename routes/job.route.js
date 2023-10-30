@@ -32,8 +32,6 @@ jobRouter.get(
 jobRouter.get("/details/:jobId", JobController.getById);
 jobRouter.post(
   "/create",
-  uploadFile.single("companyLogo"),
-  parseFormDataToBody,
   validationMdw(jobSchema),
   jwtCheck,
   JobController.create
