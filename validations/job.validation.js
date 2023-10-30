@@ -15,10 +15,13 @@ export const jobSchema = Yup.object().shape({
     .min(new Date(), "Deadline must be at least from today")
     .required("Deadline is required"),
   salary: Yup.string().required("Salary is required"),
-  sectors: Yup.string().required("Sectors is required"),
+  sectors: Yup.array().required("Sectors is required"),
   location: Yup.string().required("Location is required"),
   city: Yup.string().required("City is required"),
   position: Yup.string().required("Position is required"),
-  amount: Yup.string(),
+  amount: Yup.number()
+    .min(1, "Amount is required")
+    .max(100, "Amount is too large")
+    .required("Amount is required"),
   description: Yup.string().required("Job description is required"),
 });
