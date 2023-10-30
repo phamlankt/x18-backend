@@ -1,5 +1,9 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
-import { JobModel, RecruiterModel } from "../../globals/mongodb.js";
+import {
+  JobModel,
+  RecruiterModel,
+  ApplicationModel,
+} from "../../globals/mongodb.js";
 import {
   checkIfUserExists,
   checkIfUserIsActive,

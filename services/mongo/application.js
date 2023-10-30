@@ -3,11 +3,12 @@ import {
   ApplicantModel,
   ApplicationModel,
   JobModel,
+  RecruiterModel,
 } from "../../globals/mongodb.js";
 import { applicantGetByUserId } from "./applicant.js";
 import { getJobById } from "./jobs.js";
 import { userGetAllDetailsById } from "./users.js";
-import mongoose  from "mongoose";
+import mongoose from "mongoose";
 
 export const getAllApplication = async (req) => {
   const { id } = req.users;
@@ -27,6 +28,10 @@ export const getAllApplication = async (req) => {
   });
   const totalPages = Math.ceil(totalCounts / pageSize);
   const hasNext = currentPage < totalPages;
+  if (currentPage > totalPages)
+    throw new Error(
+      "Current page exceeds total pages. Please provide a valid page number"
+    );
 
   const applications = await ApplicationModel.find({ applicantId: id })
     .limit(pageSize)
@@ -35,11 +40,23 @@ export const getAllApplication = async (req) => {
   const applicationsWithJobs = [];
 
   for (const application of applications) {
-    const job = await JobModel.findById(application.jobId);
+    const job = await JobModel.findById(application.jobId).select(
+      "-companyLogo"
+    );
+
+    const recruiter = await RecruiterModel.findOne({ userId: job.creator });
+    if (!recruiter) {
+      const defaultRecruiter = {
+        avatarUrl:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDtSOMvaiqRFbGBefTjHzL6PMSaQ7EvdYOTg&usqp=CAU",
+      };
+      recruiter = defaultRecruiter;
+    }
 
     const applicationWithJob = {
       ...application._doc,
       job: job,
+      companyAvatarUrl: recruiter.avatarUrl,
     };
 
     applicationsWithJobs.push(applicationWithJob);
@@ -116,7 +133,7 @@ export const getApplicationByJobIdAndApplicantId = async (req) => {
 };
 
 export const applicantsAndApplicationsByJobId = async (req) => {
-  const { id, roleName } = req.users;
+  const { id } = req.users;
   const jobId = req.params.jobId;
 
   const existingUser = await userGetAllDetailsById(id);
@@ -126,8 +143,12 @@ export const applicantsAndApplicationsByJobId = async (req) => {
   if (existingUser.roleName !== "recruiter")
     throw new Error("You must be a recruiter to access this page.");
 
+  const existingJob = await getJobById(jobId);
+  if (!existingJob) throw new Error("Job does not exist");
+
   const totalCounts = await ApplicationModel.countDocuments({ jobId: jobId });
-  if (totalCounts === 0) throw new Error("No application found");
+  if (!totalCounts) throw new Error("No application found");
+
   const currentPage = parseInt(req.query.currentPage) || 1;
   const pageSize = parseInt(req.query.pageSize) || 5;
   const offset = (currentPage - 1) * pageSize;
