@@ -44,6 +44,8 @@ export const getAllApplication = async (req) => {
       "-companyLogo"
     );
 
+    if (!job) throw new Error("Job does not exist");
+
     const recruiter = await RecruiterModel.findOne({ userId: job.creator });
     if (!recruiter) {
       const defaultRecruiter = {
@@ -88,7 +90,7 @@ export const applicationGetOfJobId = async (req) => {
 
   const applications = await ApplicationModel.find({ jobId: jobId });
 
-  if (applications.length === 0) throw new Error("No job found");
+  if (!applications) throw new Error("No application found");
 
   const updatedApplications = await Promise.all(
     applications.map(async (application) => {
