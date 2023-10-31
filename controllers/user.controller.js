@@ -6,6 +6,7 @@ import {
   userGetByEmail,
   getUserById,
   userUpdateById,
+  getAllUserByQuery,
 } from "../services/mongo/users.js";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
@@ -13,6 +14,7 @@ import { comparePassWord } from "../globals/config.js";
 import { uploadStream } from "../middlewares/multer.js";
 import { jwtVerify } from "../globals/jwt.js";
 import { MongoFields } from "../globals/fields/mongo.js";
+import expressAsyncHandler from "express-async-handler";
 
 export const profileUpdateById = async (req, res) => {
   const data = req.body;
@@ -142,7 +144,17 @@ export const avatarUpload = async (req, res) => {
   }
 };
 
+const userGetAll = expressAsyncHandler(async (req, res) => {
+  const query = req.query;
+  const userInfo = req.users;
+
+  const users = await getAllUserByQuery(query, userInfo);
+
+  res.send(RESPONSE({ [ResponseFields.userList]: users }, "Successfully"));
+});
+
 const UserController = {
+  userGetAll,
   profileUpdateById,
   userChangePassword,
   userResetPassword,
