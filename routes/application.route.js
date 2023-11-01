@@ -3,6 +3,7 @@ import ApplicationController from "../controllers/application.controller.js";
 import { jwtCheck } from "../middlewares/jwt.js";
 import { validationMdw } from "../middlewares/validate.middleware.js";
 import { applicationSchema } from "../validations/application.validation.js";
+import { multipleUpload, uploadFile } from "../middlewares/multer.js";
 
 const applicationRouter = express.Router();
 
@@ -13,7 +14,8 @@ applicationRouter.get("/applicants/:jobId", jwtCheck, ApplicationController.getA
 
 applicationRouter.post(
   "/create",
-  validationMdw(applicationSchema),
+  // validationMdw(applicationSchema),
+  multipleUpload,
   jwtCheck,
   ApplicationController.create
 );

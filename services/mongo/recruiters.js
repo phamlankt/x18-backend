@@ -36,6 +36,7 @@ export const recruiterUpdateByUserId = async (data) => {
     sectors,
     description,
     avatarUrl,
+    companyLogoUrl,
   } = data;
 
   const existingUser = await recruiterGetByUserId(userId);
@@ -66,6 +67,10 @@ export const recruiterUpdateByUserId = async (data) => {
 
   if (avatarUrl) {
     existingUser.avatarUrl = avatarUrl;
+  }
+
+  if (companyLogoUrl) {
+    existingUser.companyLogoUrl = companyLogoUrl;
   }
 
   return await existingUser.save();

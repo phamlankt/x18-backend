@@ -16,6 +16,7 @@ import { MongoFields } from "../globals/fields/mongo.js";
 
 export const profileUpdateById = async (req, res) => {
   const data = req.body;
+  console.log("data", data);
   const { id, roleName } = req.body;
   try {
     await userUpdateById(data);
@@ -142,11 +143,40 @@ export const avatarUpload = async (req, res) => {
   }
 };
 
+export const companyLogoUpload = async (req, res) => {
+  try {
+    
+    const { id, roleName } = req.users;
+    const src = await uploadStream(req.file.buffer);
+    if (!src) throw new Error("Missing required fields");
+    const updated_info = {
+      userId: id,
+      companyLogoUrl: src.url,
+    };
+    // let result;
+    if (roleName !== "recruiter")
+      throw new Error("User needs to be a recruiter to upload company logo");
+    const result = await recruiterUpdateByUserId(updated_info);
+
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.userInfo]: result,
+        },
+        "Update successful"
+      )
+    );
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
 const UserController = {
   profileUpdateById,
   userChangePassword,
   userResetPassword,
   avatarUpload,
+  companyLogoUpload,
 };
 
 export default UserController;

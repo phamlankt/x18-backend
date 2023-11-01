@@ -81,9 +81,18 @@ const getApplicationByJobIdForApplicant = asyncHandler(async (req, res) => {
 
 const create = asyncHandler(async (req, res) => {
   try {
-    const { jobId, documents, note } = req.body;
+    const { jobId, documentNames, note } = req.body;
+    const uploadedFiles = req.files;
+    const uploadedDocuments = uploadedFiles.map((file, index) => {
+      return {
+        name: documentNames[index],
+        path: file.path,
+        fileName: file.filename,
+      };
+    });
 
-    if (!jobId || !documents) throw new Error("Missing required fields");
+    if (!jobId || uploadedFiles.length === 0 || documentNames.length === 0)
+      throw new Error("Missing required fields");
     const { id } = req.users;
 
     const user = await getUserById(id);
@@ -104,7 +113,7 @@ const create = asyncHandler(async (req, res) => {
     const newApplication = await applicationCreate({
       applicantId: id,
       jobId,
-      documents,
+      documents: uploadedDocuments,
       note,
       status: "sent",
     });

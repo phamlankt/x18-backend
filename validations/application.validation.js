@@ -11,5 +11,5 @@ getBusinessSectos();
 export const applicationSchema = Yup.object().shape({
   jobId: Yup.string().required("Jobid is required"),
   note: Yup.string(),
-  documents: Yup.array().required("Documents are required"),
+  documentNames: Yup.array().required("Documents are required"),
 });
