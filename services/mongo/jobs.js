@@ -16,17 +16,17 @@ export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
     query;
 
-  const offset = (currentPage - 1) * pageSize || 0;
-  const sortFieldValue = sortField || "createdAt";
-  let sortByValue = sortBy === "asc" && sortBy ? 1 : -1;
-  let queryCondition = { status: { $in: ["open", "extended"] } };
-
   if (!currentPage || isNaN(currentPage) || currentPage < 1) {
     currentPage = 1;
   }
   if (!pageSize || isNaN(pageSize) || pageSize < 1) {
     pageSize = 10;
   }
+
+  const offset = (currentPage - 1) * pageSize || 0;
+  const sortFieldValue = sortField || "createdAt";
+  let sortByValue = sortBy === "asc" && sortBy ? 1 : -1;
+  let queryCondition = { status: { $in: ["open", "extended"] } };
 
   if (search) {
     queryCondition.title = { $regex: search, $options: "i" };

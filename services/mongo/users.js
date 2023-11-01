@@ -156,7 +156,6 @@ export const userGetAll = async (isShowPassword = false, cussor = -1) => {
 
 export const getAllUserByQuery = async (query, userInfo) => {
   let { search, roles, currentPage, pageSize } = query;
-  const offset = (currentPage - 1) * pageSize || 0;
 
   if (!currentPage || isNaN(currentPage) || currentPage < 1) {
     currentPage = 1;
@@ -164,6 +163,8 @@ export const getAllUserByQuery = async (query, userInfo) => {
   if (!pageSize || isNaN(pageSize) || pageSize < 1) {
     pageSize = 10;
   }
+  const offset = (currentPage - 1) * pageSize || 0;
+
   const queryOptions = {};
 
   if (search) {
