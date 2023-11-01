@@ -1,6 +1,12 @@
+import { ObjectId } from "mongodb";
 import { hashPassWord, limit } from "../../globals/config.js";
 import { MongoFields } from "../../globals/fields/mongo.js";
-import { UserModel } from "../../globals/mongodb.js";
+import {
+  AdminModel,
+  ApplicantModel,
+  RecruiterModel,
+  UserModel,
+} from "../../globals/mongodb.js";
 import { roleGetById } from "./roles.js";
 import { recruiterGetByUserId } from "./recruiters.js";
 import { applicantGetByUserId } from "./applicant.js";
@@ -148,4 +154,81 @@ export const userGetAll = async (isShowPassword = false, cussor = -1) => {
     .sort({ [MongoFields.id]: -1 })
     .limit(limit)
     .select("-password");
+};
+
+export const getAllUserByQuery = async (query, userInfo) => {
+  let { search, roles, currentPage, pageSize } = query;
+  const offset = (currentPage - 1) * pageSize || 0;
+
+  if (!currentPage || isNaN(currentPage) || currentPage < 1) {
+    currentPage = 1;
+  }
+  if (!pageSize || isNaN(pageSize) || pageSize < 1) {
+    pageSize = 10;
+  }
+  const queryOptions = {};
+
+  if (search) {
+    queryOptions.email = { $regex: search, $options: "i" };
+  }
+
+  if (roles) {
+    const rolesArray = roles.split(",");
+    queryOptions.roleId = {
+      $in: rolesArray,
+    };
+  }
+
+  const totalCounts = await UserModel.countDocuments(queryOptions);
+  if (!totalCounts) {
+    return {
+      users: [],
+      pagination: {
+        totalCounts: 0,
+        offset: 0,
+        hasNext: false,
+      },
+    };
+  }
+
+  const users = await UserModel.find(queryOptions)
+    .limit(pageSize)
+    .skip(offset)
+    .sort({
+      createdAt: -1,
+    })
+    .select("-password");
+
+  const userIds = users.map((user) => user._id);
+  const userAdmins = await AdminModel.find({
+    userId: { $in: userIds },
+  });
+  const userRecruiters = await RecruiterModel.find({
+    userId: { $in: userIds },
+  });
+  const userApplicants = await ApplicantModel.find({
+    userId: { $in: userIds },
+  });
+
+  const userInfoArr = [...userAdmins, ...userRecruiters, ...userApplicants];
+
+  const responseUsers = users.map((user) => {
+    const userInfo = userInfoArr.find((item) => {
+      return (
+        item.userId.toString() === user._id.toString() ||
+        item.userId === user._id
+      );
+    });
+    return { ...user.toObject(), userInfo };
+  });
+
+  const hasNext = totalCounts > offset + users.length;
+  return {
+    users: responseUsers,
+    pagination: {
+      totalCounts,
+      offset,
+      hasNext,
+    },
+  };
 };

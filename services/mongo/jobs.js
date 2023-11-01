@@ -1,10 +1,16 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
-import { JobModel, RecruiterModel } from "../../globals/mongodb.js";
+import {
+  JobModel,
+  RecruiterModel,
+  ApplicationModel,
+} from "../../globals/mongodb.js";
 import {
   checkIfUserExists,
   checkIfUserIsActive,
 } from "../../utils/userUtils.js";
 import { calculatePagination } from "../../utils/paginationUtils.js";
+import { getUserById } from "./users.js";
+import { roleGetById } from "./roles.js";
 import mongoose from "mongoose";
 export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
@@ -82,7 +88,6 @@ export const getActiveJobByQuery = async (query) => {
 
   return { jobs: jobsWithCreator, pagination };
 };
-import { ApplicationModel } from "../../globals/mongodb.js";
 
 //Get all jobs for loggin in users
 export const getAllJobs = async (user, query, currentPage, pageSize) => {
@@ -146,21 +151,23 @@ export const getAllJobs = async (user, query, currentPage, pageSize) => {
     .limit(pageSize)
     .skip(offset);
 
-    const jobsWithApplicationsCount = await Promise.all(
-      jobs.map(async (job) => {
-        const allApplicationsCount = await ApplicationModel.countDocuments({ jobId: job._id });
-        const validApplicationsCount = await ApplicationModel.countDocuments({ 
-          jobId: job._id,
-          status: { $in: ['confirmed', 'sent'] }
-        });
-    
-        return { 
-          ...job.toObject(), 
-          allApplicationsCount, 
-          validApplicationsCount 
-        };
-      })
-    );
+  const jobsWithApplicationsCount = await Promise.all(
+    jobs.map(async (job) => {
+      const allApplicationsCount = await ApplicationModel.countDocuments({
+        jobId: job._id,
+      });
+      const validApplicationsCount = await ApplicationModel.countDocuments({
+        jobId: job._id,
+        status: { $in: ["confirmed", "sent"] },
+      });
+
+      return {
+        ...job.toObject(),
+        allApplicationsCount,
+        validApplicationsCount,
+      };
+    })
+  );
 
   return {
     data: jobsWithApplicationsCount,
@@ -209,26 +216,34 @@ export const getAllActiveJobs = async (user, currentPage, pageSize) => {
   };
 };
 
-export const createJob = async (data) => {
+export const createJob = async ({ data, userId }) => {
   if (
     !data.title ||
     !data.deadline ||
-    !data.creator ||
     !data.sectors ||
     !data.salary ||
     !data.location ||
     !data.city ||
     !data.position ||
     !data.description ||
-    !data.companyLogo
+    !data.amount
   ) {
     throw new Error("Missing required fields to create job");
   }
 
+  const user = await getUserById(userId);
+  if (!user) throw new Error("User does not exist!");
+  if (user.status !== "active") throw new Error("User is inactive!");
+
+  const role = await roleGetById(user.roleId);
+  if (!role) throw new Error("Role does not exist!");
+  if (role.name !== "recruiter")
+    throw new Error("User must be a recruiter in order to create a job");
+
+  data.creator = userId;
   data.deadline = new Date(data.deadline);
   data.amount = Number(data.amount) || 0;
   data.status = "open";
-  data.sectors = data.sectors.split(",");
 
   const jobDoc = new JobModel(data);
 
@@ -250,12 +265,40 @@ export const removeJobById = async (data) => {
   return await existingJob.save();
 };
 
-export const updateJobById = async (jobId, updateData) => {
-  const existingJob = await getJobById(jobId);
+export const updateJobById = async ({ jobId, updateData, userId }) => {
+  const user = await getUserById(userId);
+  if (!user) throw new Error("User does not exist!");
+  if (user.status !== "active") throw new Error("User is inactive!");
 
+  const role = await roleGetById(user.roleId);
+  if (!role) throw new Error("Role does not exist!");
+
+  if (role.name !== "recruiter")
+    throw new Error(
+      "User must be a recruiter in order to update their created job"
+    );
+
+  const currentJob = await getJobById(jobId);
+  if (!currentJob) throw new Error("Job does not exist!");
+  if (currentJob.creator !== userId)
+    throw new Error(
+      "User is not the owner of this job, hence is not allowed to update this job"
+    );
+
+  const existingJob = await getJobById(jobId);
   if (!existingJob) {
     throw new Error("Job does not exist!");
   }
+
+  if (updateData.deadline) {
+    updateData.deadline = new Date(updateData.deadline);
+  }
+
+  if (updateData.status) {
+    existingJob.status = updateData.status;
+  }
+
+  ///chưa cập nhập được, vì existingJob.hasOwnProperty(prop) luôn false
   for (const prop in updateData) {
     if (existingJob.hasOwnProperty(prop)) {
       existingJob[prop] = updateData[prop];
