@@ -86,6 +86,7 @@ export const userGetAllDetailsById = async (id) => {
       sectors,
       description,
       avatarUrl,
+      companyLogoUrl
     } = currentRecruiter;
     currentUser = {
       ...currentUser[MongoFields.doc],
@@ -96,6 +97,7 @@ export const userGetAllDetailsById = async (id) => {
       sectors,
       description,
       avatarUrl,
+      companyLogoUrl
     };
   } else if (currentRole.name.includes("applicant")) {
     const currentApplicant = await applicantGetByUserId(id);

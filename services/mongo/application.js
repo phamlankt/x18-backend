@@ -58,7 +58,7 @@ export const getAllApplication = async (req) => {
     const applicationWithJob = {
       ...application._doc,
       job: job,
-      companyAvatarUrl: recruiter.avatarUrl,
+      companyLogoUrl: recruiter.companyLogoUrl,
     };
 
     applicationsWithJobs.push(applicationWithJob);
@@ -129,8 +129,8 @@ export const getApplicationByJobIdAndApplicantId = async (req) => {
     [MongoFields.applicantId]: id,
   });
 
-  if (!application) throw new Error("Applicant did not apply to this job yet!");
-
+  // if (!application) throw new Error("Applicant did not apply to this job yet!");
+  if (!application) return {}
   return application;
 };
 

@@ -16,7 +16,7 @@ const ApplicationSchema = new mongoose.Schema(
     },
     note: {
       type: String,
-      required: true,
+      required: false,
     },
     status: { 
       type: String,

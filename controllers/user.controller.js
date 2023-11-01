@@ -18,6 +18,7 @@ import expressAsyncHandler from "express-async-handler";
 
 export const profileUpdateById = async (req, res) => {
   const data = req.body;
+  console.log("data", data);
   const { id, roleName } = req.body;
   try {
     await userUpdateById(data);
@@ -144,6 +145,35 @@ export const avatarUpload = async (req, res) => {
   }
 };
 
+
+export const companyLogoUpload = async (req, res) => {
+  try {
+    
+    const { id, roleName } = req.users;
+    const src = await uploadStream(req.file.buffer);
+    if (!src) throw new Error("Missing required fields");
+    const updated_info = {
+      userId: id,
+      companyLogoUrl: src.url,
+    };
+    // let result;
+    if (roleName !== "recruiter")
+      throw new Error("User needs to be a recruiter to upload company logo");
+    const result = await recruiterUpdateByUserId(updated_info);
+
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.userInfo]: result,
+        },
+        "Update successful"
+      )
+    );
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
 const userGetAll = expressAsyncHandler(async (req, res) => {
   const query = req.query;
   const userInfo = req.users;
@@ -153,12 +183,14 @@ const userGetAll = expressAsyncHandler(async (req, res) => {
   res.send(RESPONSE({ [ResponseFields.userList]: users }, "Successfully"));
 });
 
+
 const UserController = {
   userGetAll,
   profileUpdateById,
   userChangePassword,
   userResetPassword,
   avatarUpload,
+  companyLogoUpload,
 };
 
 export default UserController;

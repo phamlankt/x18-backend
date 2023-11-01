@@ -32,4 +32,11 @@ userRouter.post(
   UserController.avatarUpload
 );
 
+userRouter.post(
+  "/upload-logo",
+  uploadFile.single("avatar"),
+  jwtCheck,
+  UserController.companyLogoUpload
+);
+
 export default userRouter;
