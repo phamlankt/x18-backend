@@ -158,7 +158,6 @@ export const userGetAll = async (isShowPassword = false, cussor = -1) => {
 
 export const getAllUserByQuery = async (query, userInfo) => {
   let { search, roles, currentPage, pageSize } = query;
-  const offset = (currentPage - 1) * pageSize || 0;
 
   if (!currentPage || isNaN(currentPage) || currentPage < 1) {
     currentPage = 1;
@@ -166,6 +165,8 @@ export const getAllUserByQuery = async (query, userInfo) => {
   if (!pageSize || isNaN(pageSize) || pageSize < 1) {
     pageSize = 10;
   }
+  const offset = (currentPage - 1) * pageSize || 0;
+
   const queryOptions = {};
 
   if (search) {
@@ -219,7 +220,12 @@ export const getAllUserByQuery = async (query, userInfo) => {
         item.userId === user._id
       );
     });
-    return { ...user.toObject(), userInfo };
+    return {
+      ...user.toObject(),
+      avatarUrl: userInfo?.avatarUrl || userInfo?.companyAvatarUrl,
+      fullName: userInfo?.fullName || userInfo?.companyName,
+      phoneNumber: userInfo?.phoneNumber,
+    };
   });
 
   const hasNext = totalCounts > offset + users.length;
