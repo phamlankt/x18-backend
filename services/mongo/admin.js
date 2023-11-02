@@ -2,7 +2,7 @@ import { MongoFields } from "../../globals/fields/mongo.js";
 import { AdminModel, UserModel } from "../../globals/mongodb.js";
 
 export const adminCreate = async (data) => {
-  const { userId, fullName, phoneNumber,avatarUrl } = data;
+  const { userId, fullName, phoneNumber, avatarUrl } = data;
 
   const userDoc = new AdminModel({
     userId: userId,
@@ -10,7 +10,6 @@ export const adminCreate = async (data) => {
     phoneNumber: phoneNumber,
     avatarUrl: avatarUrl,
   });
-
   return await userDoc.save();
 };
 

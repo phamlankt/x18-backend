@@ -16,7 +16,6 @@ export const userCreate = async (data, isHashPassword = true) => {
     status: "active",
     roleId: roleId,
   });
-
   return await userDoc.save();
 };
 

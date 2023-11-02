@@ -5,7 +5,7 @@ import applicationRouter from "./application.route.js";
 import userRouter from "./users.route.js";
 import bSRouter from "./businessSector.route.js";
 import mailRouter from "./mail.route.js";
-
+import adminRouter from "./admin.route.js";
 
 const router = express.Router();
 
@@ -15,6 +15,7 @@ router.use("/users", userRouter);
 router.use("/jobs", jobRouter);
 router.use("/applications", applicationRouter);
 router.use("/businessSectors", bSRouter);
+router.use('/admin', adminRouter)
 
 
 export default router;
