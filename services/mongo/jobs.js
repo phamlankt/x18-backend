@@ -294,13 +294,9 @@ export const updateJobById = async ({ jobId, updateData, userId }) => {
     updateData.deadline = new Date(updateData.deadline);
   }
 
-  if (updateData.status) {
-    existingJob.status = updateData.status;
-  }
-
   ///chưa cập nhập được, vì existingJob.hasOwnProperty(prop) luôn false
   for (const prop in updateData) {
-    if (existingJob.hasOwnProperty(prop)) {
+    if (existingJob[prop] !== undefined) {
       existingJob[prop] = updateData[prop];
     }
   }

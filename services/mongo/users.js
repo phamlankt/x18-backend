@@ -218,7 +218,12 @@ export const getAllUserByQuery = async (query, userInfo) => {
         item.userId === user._id
       );
     });
-    return { ...user.toObject(), userInfo };
+    return {
+      ...user.toObject(),
+      avatarUrl: userInfo?.avatarUrl || userInfo?.companyAvatarUrl,
+      fullName: userInfo?.fullName || userInfo?.companyName,
+      phoneNumber: userInfo?.phoneNumber,
+    };
   });
 
   const hasNext = totalCounts > offset + users.length;
