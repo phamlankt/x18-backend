@@ -303,3 +303,95 @@ export const updateJobById = async ({ jobId, updateData, userId }) => {
 
   return await existingJob.save();
 };
+
+export const getJobByUserIdAndQuery = async (query) => {
+  let {
+    userId,
+    search,
+    sectors,
+    status,
+    sortBy,
+    sortField,
+    currentPage,
+    pageSize,
+    location,
+  } = query;
+  console.log(query);
+  if (!currentPage || isNaN(currentPage) || currentPage < 1) {
+    currentPage = 1;
+  }
+  if (!pageSize || isNaN(pageSize) || pageSize < 1) {
+    pageSize = 10;
+  }
+
+  const offset = (currentPage - 1) * pageSize || 0;
+  const sortFieldValue = sortField || "createdAt";
+  let sortByValue = sortBy === "asc" && sortBy ? 1 : -1;
+  let queryCondition = {};
+
+  if (userId) {
+    queryCondition.creator = userId;
+  }
+  if (search) {
+    queryCondition.title = { $regex: search, $options: "i" };
+  }
+  if (sectors) {
+    const sectorsArray = sectors
+      .split("%")
+      .map((sector) => new RegExp(`^${sector}$`, "i"));
+
+    queryCondition.sectors = {
+      $elemMatch: {
+        $in: sectorsArray,
+      },
+    };
+  }
+  if (status) {
+    queryCondition.status = status;
+  }
+  if (location) {
+    const locationArray = location
+      .split("%")
+      .map((location) => new RegExp(`^${location}$`, "i"));
+    queryCondition.city = { $in: locationArray };
+  }
+
+  const totalJobCount = await JobModel.countDocuments(queryCondition);
+  if (totalJobCount <= 0) {
+    return {
+      jobs: [],
+      pagination: {
+        totalJobCount,
+        isNext: false,
+        offset,
+        pageSize,
+      },
+    };
+  }
+
+  const jobs = await JobModel.find(queryCondition)
+    .sort({ [sortFieldValue]: sortByValue })
+    .limit(pageSize)
+    .skip(offset);
+
+  const creators = await RecruiterModel.find({
+    userId: { $in: jobs.map((job) => job.creator) },
+  });
+
+  const jobsWithCreator = creators.length
+    ? jobs.map((job) => {
+        const creator = creators?.find((c) => c.userId === job.creator);
+        return { ...job.toObject(), creator };
+      })
+    : jobs;
+
+  const isNext = totalJobCount > offset + jobs.length;
+  const pagination = {
+    totalJobCount,
+    isNext,
+    offset,
+    pageSize,
+  };
+
+  return { jobs: jobsWithCreator, pagination };
+};

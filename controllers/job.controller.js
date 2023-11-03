@@ -7,6 +7,7 @@ import {
   getAllActiveJobs,
   getAllJobs,
   updateJobById,
+  getJobByUserIdAndQuery,
 } from "../services/mongo/jobs.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { RESPONSE } from "../globals/api.js";
@@ -148,6 +149,13 @@ const getActiveJobs = asyncHandler(async (req, res) => {
   res.json(allActiveJobs);
 });
 
+const getJobByUserId = asyncHandler(async (req, res) => {
+  const data = req.query;
+
+  const jobs = await getJobByUserIdAndQuery(data);
+  res.send(RESPONSE({ [ResponseFields.jobList]: jobs }, "Successfully"));
+});
+
 const JobController = {
   getAll,
   getById,
@@ -156,6 +164,7 @@ const JobController = {
   create,
   remove,
   update,
+  getJobByUserId,
 };
 
 export default JobController;
