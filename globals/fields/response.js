@@ -16,6 +16,7 @@ const ResponseFields = {
   applicationList: "applicationList",
   jobList: "jobList",
   userList: "userList",
+  roleList: "roleList",
 };
 
 export { ResponseFields };
