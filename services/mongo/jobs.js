@@ -316,7 +316,7 @@ export const getJobByUserIdAndQuery = async (query) => {
     pageSize,
     location,
   } = query;
-  console.log(query);
+
   if (!currentPage || isNaN(currentPage) || currentPage < 1) {
     currentPage = 1;
   }
