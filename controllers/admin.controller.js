@@ -24,7 +24,6 @@ const createAdmin = asyncHandler( async(req, res) => {
 
 const updateAdmin = asyncHandler(async (req, res) => {
   const { userId, fullName, phoneNumber, avatarUrl } = req.body;
-  const dataToUpdateAdmin = { fullName, phoneNumber, avatarUrl }
   try {
     const checkAdmin = await adminGetByUserId(userId);
     if (checkAdmin) {
