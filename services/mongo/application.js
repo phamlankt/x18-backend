@@ -40,7 +40,7 @@ export const getAllApplication = async (req) => {
   const applicationsWithJobs = [];
 
   for (const application of applications) {
-    const job = await JobModel.findById(application.jobId).select(
+    let job = await JobModel.findById(application.jobId).select(
       "-companyLogo"
     );
     if (!job) {
@@ -64,7 +64,7 @@ export const getAllApplication = async (req) => {
       job = defaultJob;
     }
 
-    const recruiter = await RecruiterModel.findOne({ userId: job.creator });
+    let recruiter = await RecruiterModel.findOne({ userId: job.creator });
     if (!recruiter) {
       const defaultRecruiter = {
         avatarUrl:
