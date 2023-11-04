@@ -395,3 +395,30 @@ export const getJobByUserIdAndQuery = async (query) => {
 
   return { jobs: jobsWithCreator, pagination };
 };
+
+export const removeJobAndAddDescription = async (data) => {
+  const { jobId, reason } = data;
+
+  const existingJob = await JobModel.findOne({ [MongoFields.id]: jobId });
+  if (!existingJob) throw new Error("Job does not exist!");
+
+  existingJob.status = "removed";
+  existingJob.removeDescription = reason;
+
+  const jobInfo = await existingJob.save();
+
+  const creator = await RecruiterModel.findOne({
+    userId: jobInfo.creator,
+  });
+
+  if (!creator) {
+    throw new Error("Creator does not exist!");
+  }
+
+  const resInfo = {
+    ...jobInfo.toObject(),
+    creator,
+  };
+
+  return resInfo;
+};

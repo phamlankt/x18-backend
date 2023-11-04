@@ -33,7 +33,6 @@ adminRouter.get(
   ]),
   JobController.getJobByUserId
 );
-
 adminRouter.get(
   "/jobs",
   checkQuery([
@@ -48,6 +47,7 @@ adminRouter.get(
   ]),
   JobController.getJobByUserId
 );
+adminRouter.put("/jobs/remove", JobController.removeJobByAdmin);
 
 adminRouter.post("/create", jwtCheck, admin.createAdmin);
 adminRouter.post("/update", jwtCheck, admin.updateAdmin);
