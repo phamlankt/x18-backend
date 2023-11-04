@@ -43,8 +43,26 @@ export const getAllApplication = async (req) => {
     const job = await JobModel.findById(application.jobId).select(
       "-companyLogo"
     );
-
-    if (!job) throw new Error("Job does not exist");
+    if (!job) {
+      const defaultJob = {
+        _id: "6538b2235137f267553ad6ae",
+        title: "Embedded Software Tester (From 3 Years Exp)",
+        deadline: "2023-11-03T05:30:43.000Z",
+        creator: "65290357dd680640c60dacc9",
+        salary: "200-400",
+        location: "Viet Nam",
+        city: "ha-noi",
+        position: "Junior",
+        amount: 0,
+        description:
+          "<p><strong>JOB DESCRIPTION:</strong></p><ul><li>Engineering services for embedded software projects (C, Automotive)</li><li>Working with engineering team to make overall project proposal (work packages, time schedule...)</li><li>Supporting sales with quotation, pricing and contract with customer's supplier-Leading project team, execute project till final delivery to customer</li><li>Use PM tools for project management</li></ul><p><br></p><p><strong>JOB REQUIREMENTS:</strong></p><ul><li>B.S or Master degree in Mechatronic Engineering, Automotive Engineering, Electronics, Computing Engineering, Information Technology or related fields</li><li>Should possess strong knowledge and at least 3 years of experience in Project Management, Risk Management Good at stakeholder management skills</li><li>English proficiency is a must</li><li>Have strong experience in Embedded software development</li><li>Excellent analytical and problem-solving skills</li><li>Familiarity with software configuration management tools, defect tracking tools, and peer review</li><li>Have hands-on experience in Automotive Diagnostics and Communication protocols is big advantage</li><li>PMQ/PMP certificate is preferred</li></ul>",
+        sectors: ["IT"],
+        status: "open",
+        createdAt: "2023-10-25T06:13:55.994Z",
+        updatedAt: "2023-10-25T06:13:55.994Z",
+      };
+      job = defaultJob;
+    }
 
     const recruiter = await RecruiterModel.findOne({ userId: job.creator });
     if (!recruiter) {
