@@ -4,6 +4,7 @@ import { checkUser } from "../middlewares/checkUser.middlewarae.js";
 import { checkQuery } from "../middlewares/checkQuery.middleware.js";
 import UserController from "../controllers/user.controller.js";
 import { jwtCheck } from "../middlewares/jwt.js";
+import admin from "../controllers/admin.controller.js";
 
 const adminRouter = express.Router();
 
@@ -17,7 +18,9 @@ adminRouter.get(
   UserController.userGetAll
 );
 
-////more apis
-//....
+
+adminRouter.post("/create", jwtCheck, admin.createAdmin)
+adminRouter.post("/update", jwtCheck, admin.updateAdmin)
+
 
 export default adminRouter;

@@ -6,6 +6,7 @@ export const checkQuery = (ruleArray) => {
     const queryKeys = Object.keys(query);
     queryKeys.forEach((key) => {
       if (!ruleArray.includes(key)) {
+        console.log(11);
         res.status(400);
         throw new Error("Invalid query params");
       }
