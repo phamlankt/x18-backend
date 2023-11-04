@@ -16,6 +16,9 @@ import { getUserById } from "../services/mongo/users.js";
 import { roleGetById } from "../services/mongo/roles.js";
 import { getJobById } from "../services/mongo/jobs.js";
 import { MongoFields } from "../globals/fields/mongo.js";
+import { uploadStream } from "../middlewares/multer.js";
+import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
 
 // Get all  applications
 const getAll = asyncHandler(async (req, res) => {
@@ -83,13 +86,6 @@ const create = asyncHandler(async (req, res) => {
   try {
     const { jobId, documentNames, note } = req.body;
     const uploadedFiles = req.files;
-    const uploadedDocuments = uploadedFiles.map((file, index) => {
-      return {
-        name: documentNames[index],
-        path: file.path,
-        fileName: file.filename,
-      };
-    });
 
     if (!jobId || uploadedFiles.length === 0 || documentNames.length === 0)
       throw new Error("Missing required fields");
@@ -109,22 +105,37 @@ const create = asyncHandler(async (req, res) => {
 
     const application = await applicationGetByApplicantIdAndJobId(id, jobId);
     if (application) throw new Error("User applied to this job already!");
-
-    const newApplication = await applicationCreate({
-      applicantId: id,
-      jobId,
-      documents: uploadedDocuments,
-      note,
-      status: "sent",
+    const uploadedDocuments = uploadedFiles.map((file) => {
+      return cloudinary.uploader.upload(file.path, { folder: "x18-documents" });
     });
-    res.send(
-      RESPONSE(
-        {
-          [ResponseFields.applicationInfo]: newApplication,
-        },
-        "Create new application successfully"
-      )
-    );
+
+    await Promise.all(uploadedDocuments).then(async (values) => {
+      uploadedFiles.map((file) => {
+        fs.existsSync(file.path) && fs.unlinkSync(file.path);
+      });
+      const responseDocu = values.map((value, index) => {
+        return {
+          name: documentNames[index],
+          path: value.url,
+          fileName: value.original_filename,
+        };
+      });
+      const newApplication = await applicationCreate({
+        applicantId: id,
+        jobId,
+        documents: responseDocu,
+        note,
+        status: "sent",
+      });
+      res.send(
+        RESPONSE(
+          {
+            [ResponseFields.applicationInfo]: newApplication,
+          },
+          "Create new application successfully"
+        )
+      );
+    });
   } catch (e) {
     res
       .status(400)
