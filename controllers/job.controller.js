@@ -49,6 +49,15 @@ const getById = asyncHandler(async (req, res) => {
             "Get job successfully"
           )
         );
+      else
+        res.send(
+          RESPONSE(
+            {
+              [ResponseFields.jobInfo]: null,
+            },
+            "Get job successfully"
+          )
+        );
     }
   } catch (e) {
     res
