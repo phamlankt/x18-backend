@@ -28,10 +28,10 @@ export const getAllApplication = async (req) => {
   });
   const totalPages = Math.ceil(totalCounts / pageSize);
   const hasNext = currentPage < totalPages;
-  if (currentPage > totalPages)
-    throw new Error(
-      "Current page exceeds total pages. Please provide a valid page number"
-    );
+  // if (currentPage > totalPages)
+  //   throw new Error(
+  //     "Current page exceeds total pages. Please provide a valid page number"
+  //   );
 
   const applications = await ApplicationModel.find({ applicantId: id })
     .limit(pageSize)

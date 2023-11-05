@@ -24,10 +24,11 @@ const createAdmin = asyncHandler( async(req, res) => {
 
 const updateAdmin = asyncHandler(async (req, res) => {
   const { userId, fullName, phoneNumber, avatarUrl } = req.body;
+  const dataToUpdateAdmin = { fullName, phoneNumber, avatarUrl }
   try {
     const checkAdmin = await adminGetByUserId(userId);
     if (checkAdmin) {
-        const createAdmin =  await adminUpdateByUserId(req.body)
+        const createAdmin =  await adminUpdateByUserId(dataToUpdateAdmin)
         res.send({data: createAdmin})
     } else {
       res.status(400).send(RESPONSE([], "Unsuccessful", { error: 'Wrong id' }))
