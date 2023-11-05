@@ -46,6 +46,11 @@ const JobSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    removeDescription: {
+      type: String,
+      required: false,
+      default: "",
+    },
   },
   {
     timestamps: true,
