@@ -33,9 +33,8 @@ const createBSector = async (req, res) => {
 // Update an existing business sector by ID
 const updateBSector = async (req, res) => {
   try {
-    const { name } = req.body;
-    const businessSectorId = req.params.id;
-    const updatedBusinessSector = await updateBusinessSector(businessSectorId, name);
+    const { id, name } = req.body;
+    const updatedBusinessSector = await updateBusinessSector(id, name);
     res.status(200).json(updatedBusinessSector);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

@@ -18,31 +18,33 @@ import { ApplicantModel, BusinessSectorModel } from "../../globals/mongodb.js";
 //   return await existingBS.save();
 // };
 
-export const createBusinessSector = async (name) => {
-  if (!name || name.trim() === '') {
-    throw new Error('Business sector name is missing or empty.');
+export const createBusinessSector = async (name, user) => {
+  if (!user) {
+    throw new Error('User does not exist!');
   }
-
+  if (!name || name.trim() === '') {
+    throw new Error('Business sector name is missing or empty!');
+  }
   const duplicateBusinessSector = await BusinessSectorModel.findOne({
     name: name.toLowerCase(),
   });
-
   if (duplicateBusinessSector) {
-    throw new Error('Duplicate business sector name.');
+    throw new Error('Duplicate business sector name!');
   }
-
   const newBusinessSector = new BusinessSectorModel({ name });
   return await newBusinessSector.save();
 };
 
-export const updateBusinessSector = async (id, name) => {
-  if (!name || name.trim() === '') {
-    throw new Error('Business sector name is missing or empty.');
+export const updateBusinessSector = async (id, name, user) => {
+  if (!user) {
+    throw new Error('User does not exist!');
   }
-
+  if (!name || name.trim() === '') {
+    throw new Error('Business sector name is missing or empty!');
+  }
   const existingBusinessSector = await BusinessSectorModel.findById(id);
   if (!existingBusinessSector) {
-    throw new Error('Business sector does not exist.');
+    throw new Error('Business sector does not exist!');
   }
 
   const duplicateBusinessSector = await BusinessSectorModel.findOne({
@@ -51,7 +53,7 @@ export const updateBusinessSector = async (id, name) => {
   });
 
   if (duplicateBusinessSector) {
-    throw new Error('Duplicate business sector name.');
+    throw new Error('Duplicate business sector name!');
   }
 
   existingBusinessSector.name = name;
