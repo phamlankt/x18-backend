@@ -3,6 +3,7 @@ import {
   JobModel,
   RecruiterModel,
   ApplicationModel,
+  UserModel,
 } from "../../globals/mongodb.js";
 import {
   checkIfUserExists,
@@ -12,6 +13,7 @@ import { calculatePagination } from "../../utils/paginationUtils.js";
 import { getUserById } from "./users.js";
 import { roleGetById } from "./roles.js";
 import mongoose from "mongoose";
+import { sendMail } from "../Mail/mail.js";
 export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
     query;
@@ -414,6 +416,19 @@ export const removeJobAndAddDescription = async (data) => {
   if (!creator) {
     throw new Error("Creator does not exist!");
   }
+
+  const userAccount = await UserModel.findOne({
+    [MongoFields.id]: creator.userId,
+  });
+  if (!userAccount) {
+    throw new Error("User does not exist!");
+  }
+
+  sendMail(
+    userAccount.email,
+    "Job Removed - JobStar",
+    `Your job - ${jobInfo.title} has been removed. Reason: ${reason}`
+  );
 
   const resInfo = {
     ...jobInfo.toObject(),
