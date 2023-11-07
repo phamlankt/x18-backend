@@ -24,9 +24,16 @@ const createBSector = async (req, res) => {
   try {
     const { name } = req.body;
     const createdBusinessSector = await createBusinessSector(name);
-    res.status(201).json(createdBusinessSector);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.businessSectorList]: createdBusinessSector,
+        },
+        "Successfully created"
+      )
+    );
+  } catch (e) {
+    res.status(400).send(RESPONSE([], "Unsuccessfully created", e.errors, e.message));
   }
 };
 
@@ -35,9 +42,16 @@ const updateBSector = async (req, res) => {
   try {
     const { id, name } = req.body;
     const updatedBusinessSector = await updateBusinessSector(id, name);
-    res.status(200).json(updatedBusinessSector);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.send(
+      RESPONSE(
+        {
+          [ResponseFields.businessSectorList]: updatedBusinessSector,
+        },
+        "Successfully updated"
+      )
+    );
+  } catch (e) {
+    res.status(400).send(RESPONSE([], "Unsuccessfully updated", e.errors, e.message));
   }
 };
 
