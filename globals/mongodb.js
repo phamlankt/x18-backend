@@ -7,6 +7,7 @@ import ApplicantSchema from "../models/applicant.schema.js";
 import JobSchema from "../models/job.schema.js";
 import RoleSchema from "../models/role.schema.js";
 import AdminSchema from "../models/admin.schema.js";
+import NotificationSchema from "../models/notification.schema.js";
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -20,6 +21,7 @@ const connectToDatabase = async () => {
   }
 };
 
+const NotificationModel = mongoose.model("notifications", NotificationSchema);
 const UserModel = mongoose.model("users", UserSchema);
 const RoleModel = mongoose.model("roles", RoleSchema);
 const RecruiterModel = mongoose.model("recruiters", RecruiterSchema);
@@ -34,6 +36,7 @@ const BusinessSectorModel = mongoose.model(
 
 export {
   connectToDatabase,
+  NotificationModel,
   UserModel,
   RoleModel,
   RecruiterModel,

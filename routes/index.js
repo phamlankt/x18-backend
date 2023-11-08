@@ -7,6 +7,7 @@ import bSRouter from "./businessSector.route.js";
 import mailRouter from "./mail.route.js";
 import adminRouter from "./admin.route.js";
 import roleRouter from "./role.route.js";
+import notificationRouter from "./notification.route.js";
 
 const router = express.Router();
 
@@ -18,5 +19,6 @@ router.use("/applications", applicationRouter);
 router.use("/businessSectors", bSRouter);
 router.use("/role", roleRouter);
 router.use("/admin", adminRouter);
+router.use("/notifications", notificationRouter);
 
 export default router;
