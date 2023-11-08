@@ -10,6 +10,7 @@ const ResponseFields = {
   jobInfo: "jobInfo",
   applicationInfo: "applicationInfo",
   businessSectorList: "businessSectorList",
+  businessSectorInfo: "businessSectorInfo",
   imageList: "imageList",
   CodeMessage: "CodeMessage",
   message: "message",

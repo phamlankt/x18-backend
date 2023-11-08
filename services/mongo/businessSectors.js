@@ -18,53 +18,86 @@ import { ApplicantModel, BusinessSectorModel } from "../../globals/mongodb.js";
 //   return await existingBS.save();
 // };
 
-export const createBusinessSector = async (name, user) => {
-  if (!user) {
-    throw new Error('User does not exist!');
+export const createBusinessSector = async (name) => {
+  if (!name || name.trim() === "") {
+    throw new Error("Business sector name is missing or empty!");
   }
-  if (!name || name.trim() === '') {
-    throw new Error('Business sector name is missing or empty!');
-  }
+
   const duplicateBusinessSector = await BusinessSectorModel.findOne({
-    name: name.toLowerCase(),
+    name: { $regex: new RegExp(`^${name}$`, "i") },
   });
+
   if (duplicateBusinessSector) {
-    throw new Error('Duplicate business sector name!');
+    throw new Error("Duplicate business sector name!");
   }
   const newBusinessSector = new BusinessSectorModel({ name });
   return await newBusinessSector.save();
 };
 
-export const updateBusinessSector = async (id, name, user) => {
-  if (!user) {
-    throw new Error('User does not exist!');
+export const updateBusinessSector = async (sectorId, name) => {
+  if (!name || name.trim() === "") {
+    throw new Error("Business sector name is missing or empty!");
   }
-  if (!name || name.trim() === '') {
-    throw new Error('Business sector name is missing or empty!');
-  }
-  const existingBusinessSector = await BusinessSectorModel.findById(id);
+  const existingBusinessSector = await BusinessSectorModel.findById(sectorId);
   if (!existingBusinessSector) {
-    throw new Error('Business sector does not exist!');
+    throw new Error("Business sector does not exist!");
   }
 
   const duplicateBusinessSector = await BusinessSectorModel.findOne({
-    name: { $regex: new RegExp(`^${name}$`, 'i') },
-    _id: { $ne: id }, // Exclude the current business sector from the check
+    name: { $regex: new RegExp(`^${name}$`, "i") },
+    _id: { $ne: sectorId }, // Exclude the current business sector from the check
   });
 
   if (duplicateBusinessSector) {
-    throw new Error('Duplicate business sector name!');
+    throw new Error("Duplicate business sector name!");
   }
 
   existingBusinessSector.name = name;
   return await existingBusinessSector.save();
 };
 
-export const businessSectorGetAll = async () => {
-  return await BusinessSectorModel.find({});
+export const businessSectorGetAll = async (data = {}) => {
+  let { search, pageSize, currentPage } = data;
+  const query = {};
+
+  if (search) {
+    query.name = { $regex: search, $options: "i" };
+  }
+
+  currentPage = currentPage || 1;
+  const offset = (currentPage - 1) * pageSize;
+
+  const totalSectorCount = await BusinessSectorModel.countDocuments(query);
+  if (totalSectorCount === 0) {
+    return {
+      sectors: [],
+      pagination: {
+        totalSectorCount,
+        isNext: false,
+        offset,
+        pageSize,
+      },
+    };
+  }
+
+  const sectors = await BusinessSectorModel.find(query)
+    .sort({ createdAt: -1 })
+    .limit(parseInt(pageSize))
+    .skip(offset);
+
+  const isNext = totalSectorCount > offset + sectors.length;
+  const pagination = {
+    totalSectorCount,
+    isNext,
+    offset,
+    pageSize,
+  };
+  return {
+    sectors,
+    pagination,
+  };
 };
 
 export const businessSectorGetById = async (id) => {
   return await BusinessSectorModel.findOne({ [MongoFields.id]: id });
 };
-
