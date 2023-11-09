@@ -2,12 +2,15 @@ import multer from "multer";
 import { Readable } from "stream";
 import { v2 as cloudinary } from "cloudinary";
 import { env } from "../globals/config.js";
-
+import fs from "fs"
 const storage = multer.memoryStorage();
 // Configure multer storage and file name
 const storageDisk = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    const uploadPath = "uploads";
+
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);

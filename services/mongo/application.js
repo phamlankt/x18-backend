@@ -119,8 +119,8 @@ export const getApplicationByJobIdAndApplicantId = async (req) => {
   const existingUser = await userGetAllDetailsById(id);
   if (!existingUser) throw new Error("User does not exist");
 
-  if (existingUser.roleName !== "applicant")
-    throw new Error("You must be an applicant to get application!");
+  // if (existingUser.roleName !== "applicant")
+  //   throw new Error("You must be an applicant to get application!");
 
   const application = await ApplicationModel.findOne({
     [MongoFields.jobId]: jobId,

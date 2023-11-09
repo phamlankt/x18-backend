@@ -4,7 +4,7 @@ import { businessSectorGetAll } from "../services/mongo/businessSectors.js";
 let businessSectors = [];
 export const getBusinessSectos = async () => {
   const result = await businessSectorGetAll();
-  result.map((bs) => businessSectors.push(bs.name));
+  result?.sectors.map((bs) => businessSectors.push(bs.name));
 };
 getBusinessSectos();
 
