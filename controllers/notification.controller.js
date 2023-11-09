@@ -8,9 +8,9 @@ import {
 
 
 const getByRecruiter = asyncHandler(async (req, res) => {
-  const email = req.users.email;
+  const id = req.users.id;
   try {
-    await getNotificationByRecruiter(email).then((result) => {
+    await getNotificationByRecruiter(id).then((result) => {
       res.send(
         RESPONSE(
           {
