@@ -4,6 +4,7 @@ import { checkUser } from "../middlewares/checkUser.middlewarae.js";
 import { checkQuery } from "../middlewares/checkQuery.middleware.js";
 import UserController from "../controllers/user.controller.js";
 import { jwtCheck } from "../middlewares/jwt.js";
+import { uploadFile } from "../middlewares/multer.js";
 import JobController from "../controllers/job.controller.js";
 import admin from "../controllers/admin.controller.js";
 
@@ -50,6 +51,6 @@ adminRouter.get(
 adminRouter.put("/jobs/remove", JobController.removeJobByAdmin);
 
 adminRouter.post("/create", jwtCheck, admin.createAdmin);
-adminRouter.post("/update", jwtCheck, admin.updateAdmin);
+adminRouter.post("/update", uploadFile.single("avatar"), jwtCheck, admin.updateAdmin);
 
 export default adminRouter;
