@@ -5,7 +5,7 @@ import { userCreate, userUpdateById } from "../services/mongo/users.js";
 import { uploadStream } from "../middlewares/multer.js";
 
 const createAdmin = asyncHandler( async(req, res) => {
-    const { fullName, phoneNumber, avatarUrl, email, password, roles } = req.body;
+    const { fullName, phoneNumber, avatarUrl, email, password} = req.body;
     const dataToCreateUser = { email, password, roleId: '65277e1a167e7b1fe3d88cf4'}
     try { 
         const createUser = await userCreate(dataToCreateUser, true)
