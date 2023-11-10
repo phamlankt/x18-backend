@@ -2,7 +2,7 @@ import expressAsyncHandler from "express-async-handler";
 import { MongoFields } from "../../globals/fields/mongo.js";
 import { NotificationModel } from "../../globals/mongodb.js";
 import { getJobById } from "./jobs.js";
-import { userGetAllDetailsById, userGetByEmail } from "./users.js";
+import { userGetAllDetailsById } from "./users.js";
 import asyncHandler from "express-async-handler";
 
 export const getNotificationByRecruiter = async (userId) => {
@@ -13,11 +13,13 @@ export const getNotificationByRecruiter = async (userId) => {
   if (existingUser.roleName === "recruiter")
     notifications = await NotificationModel.find({
       recruiter: existingUser.email,
+      $or: [{ status: "sent" }, { status: "cancelled" }],
       read: false,
     });
   if (existingUser.roleName === "applicant")
     notifications = await NotificationModel.find({
       applicant: existingUser.email,
+      $or: [{ status: "confirmed" }, { status: "rejected" }],
       read: false,
     });
   const notificationsWithJobTitle = notifications.map(async (notification) => {
@@ -37,7 +39,6 @@ export const getNotificationByRecruiter = async (userId) => {
 };
 
 export const createNotification = asyncHandler(async (data) => {
-  console.log("data", data);
   const { recruiter, applicant, jobId, applicationId, status, read } = data;
   if (!recruiter) throw new Error("Recruiter is missing");
 
