@@ -4,10 +4,9 @@ import { adminCreate, adminGetByUserId, adminUpdateByUserId } from "../services/
 import { userCreate, userUpdateById } from "../services/mongo/users.js";
 import { uploadStream } from "../middlewares/multer.js";
 
-
 const createAdmin = asyncHandler( async(req, res) => {
     const { fullName, phoneNumber, avatarUrl, email, password, roles } = req.body;
-    const dataToCreateUser = { email, password, roleId : roles === 'admin' ? '65277e1a167e7b1fe3d88cf4' : '65277b98167e7b1fe3d88cf0'}
+    const dataToCreateUser = { email, password, roleId: '65277e1a167e7b1fe3d88cf4'}
     try { 
         const createUser = await userCreate(dataToCreateUser, true)
         const dataToCreateAdmin = { userId : createUser._id, fullName, phoneNumber, avatarUrl}
@@ -30,7 +29,7 @@ const updateAdmin = asyncHandler(async (req, res) => {
       const src = await uploadStream(req.file.buffer);
       if (!src) throw new Error("Missing required fields");
       const checkAdmin = await adminGetByUserId(userId);
-      const dataToUpdateAdmin = { fullName, phoneNumber, avatarUrl: src.url }
+      const dataToUpdateAdmin = { userId, fullName, phoneNumber, avatarUrl: src.url }
       if (checkAdmin) {
           const createAdmin =  await adminUpdateByUserId(dataToUpdateAdmin)
           res.status(200).send({data: createAdmin})
@@ -40,7 +39,7 @@ const updateAdmin = asyncHandler(async (req, res) => {
     } else {
       const checkAdmin = await adminGetByUserId(userId);
       if (checkAdmin) {
-          const dataToUpdateAdmin = { fullName, phoneNumber, avatarUrl: checkAdmin.avatarUrl}
+          const dataToUpdateAdmin = { userId, fullName, phoneNumber, avatarUrl: checkAdmin.avatarUrl}
           const createAdmin =  await adminUpdateByUserId(dataToUpdateAdmin)
           res.send({data: createAdmin})
       } else {
