@@ -4,6 +4,9 @@ import router from "./routes/index.js";
 import { connectToDatabase } from "./globals/mongodb.js";
 import { errorHandlerMiddleware } from "./middlewares/error.middleware.js";
 import cors from "cors";
+import cron from "node-cron";
+import { checkJobStatus } from "./services/bot/checkJobStatus.js";
+
 const app = express();
 const PORT = 3001;
 
@@ -21,6 +24,10 @@ const corsOptions = {
 
 // 1. Create connection to database
 connectToDatabase();
+
+cron.schedule("0 0 0 * * *", () => {
+  checkJobStatus();
+});
 
 // 2. Global middlewares
 app.use(express.json());
