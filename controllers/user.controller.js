@@ -7,6 +7,7 @@ import {
   getUserById,
   userUpdateById,
   getAllUserByQuery,
+  userGetStatistic,
 } from "../services/mongo/users.js";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
@@ -145,10 +146,8 @@ export const avatarUpload = async (req, res) => {
   }
 };
 
-
 export const companyLogoUpload = async (req, res) => {
   try {
-    
     const { id, roleName } = req.users;
     const src = await uploadStream(req.file.buffer);
     if (!src) throw new Error("Missing required fields");
@@ -183,8 +182,14 @@ const userGetAll = expressAsyncHandler(async (req, res) => {
   res.send(RESPONSE({ [ResponseFields.userList]: users }, "Successfully"));
 });
 
+const getUserStatistic = expressAsyncHandler(async (req, res) => {
+  const userStatistic = await userGetStatistic();
+
+  res.send(userStatistic);
+});
 
 const UserController = {
+  getUserStatistic,
   userGetAll,
   profileUpdateById,
   userChangePassword,

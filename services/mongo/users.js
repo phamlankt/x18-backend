@@ -5,6 +5,7 @@ import {
   AdminModel,
   ApplicantModel,
   RecruiterModel,
+  RoleModel,
   UserModel,
 } from "../../globals/mongodb.js";
 import { roleGetById } from "./roles.js";
@@ -237,4 +238,53 @@ export const getAllUserByQuery = async (query, userInfo) => {
       pageSize,
     },
   };
+};
+
+export const userGetStatistic = async () => {
+  const users = await UserModel.find({});
+  const roles = await RoleModel.find({});
+
+  let recruiterCount = 0;
+  let applicantCount = 0;
+  let adminCount = 0;
+  let superAdminCount = 0;
+
+  users.forEach((user) => {
+    roles.forEach((role) => {
+      if (user.roleId === role._id.toString() && role.name === "superadmin") {
+        superAdminCount++;
+      } else if (
+        user.roleId === role._id?.toString() &&
+        role.name === "admin"
+      ) {
+        adminCount++;
+      } else if (
+        user.roleId === role._id?.toString() &&
+        role.name === "recruiter"
+      ) {
+        recruiterCount++;
+      } else if (
+        user.roleId === role._id?.toString() &&
+        role.name === "applicant"
+      ) {
+        applicantCount++;
+      }
+    });
+  });
+
+  const totalUsers = users.length;
+
+  const recruiterPercentage = (recruiterCount / totalUsers) * 100;
+  const applicantPercentage = (applicantCount / totalUsers) * 100;
+  const adminPercentage = (adminCount / totalUsers) * 100;
+  const superAdminPercentage = (superAdminCount / totalUsers) * 100;
+
+  const result = {
+    Recruiter: recruiterPercentage,
+    Applicant: applicantPercentage,
+    Admin: adminPercentage,
+    "Super Admin": superAdminPercentage,
+  };
+
+  return result;
 };

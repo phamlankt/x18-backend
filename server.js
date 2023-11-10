@@ -7,7 +7,6 @@ import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
 import { handleSocketEvents } from "./controllers/socket.js";
-
 import cron from "node-cron";
 import { checkJobStatus } from "./services/bot/checkJobStatus.js";
 
