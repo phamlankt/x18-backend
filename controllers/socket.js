@@ -16,35 +16,48 @@ const getUser = (id) => {
   return onlineUsers.find((user) => user.id === id);
 };
 const notifiyApplicationStatus = (io, data) => {
-  console.log("data", data);
+  // console.log("data", data);
+  const { jobTitle } = data;
   const { recruiter, applicant, status } = data;
   if (status === "confirmed" || status === "rejected") {
     const applicantOnline = getUser(applicant);
-    // check if user is online then send notification
-    applicantOnline &&
-      io.to(applicantOnline.socketId).emit("getJobNotification", data);
+
     //save notification to DB
     getUserById(applicant).then((existingApplicant) => {
       if (!existingApplicant) throw new Error("Applicant does not exist!");
-      createNotification({
+      const savedData = {
         ...data,
         applicant: existingApplicant.email,
         read: false,
+      };
+      createNotification(savedData).then((result) => {
+        // check if user is online then send notification
+        applicantOnline &&
+          io
+            .to(applicantOnline.socketId)
+            .emit("getJobNotification", { ...result._doc, jobTitle });
       });
     });
   } else if (status === "sent" || status === "cancelled") {
     const recruiterOnline = getUser(recruiter);
-    // check if user is online then send notification
-    recruiterOnline &&
-      io.to(recruiterOnline.socketId).emit("getJobNotification", data);
+
     //save notification to DB
     getUserById(recruiter).then((existingRecruiter) => {
       if (!existingRecruiter) throw new Error("Recruiter does not exist!");
-      createNotification({
+      const savedData = {
         ...data,
         recruiter: existingRecruiter.email,
         read: false,
-      });
+      };
+
+      createNotification(savedData).then(
+        (result) =>{
+          // check if user is online then send notification
+          recruiterOnline &&
+          io
+            .to(recruiterOnline.socketId)
+            .emit("getJobNotification", { ...result._doc, jobTitle })}
+      );
     });
   }
 };
