@@ -9,6 +9,7 @@ import {
   updateJobById,
   getJobByUserIdAndQuery,
   removeJobAndAddDescription,
+  getStatisticJobAndApplication,
 } from "../services/mongo/jobs.js";
 import { ResponseFields } from "../globals/fields/response.js";
 import { RESPONSE } from "../globals/api.js";
@@ -173,7 +174,13 @@ const removeJobByAdmin = asyncHandler(async (req, res) => {
   res.send(RESPONSE({ [ResponseFields.jobInfo]: jobInfo }, "Successfully"));
 });
 
+const getJobStatistic = asyncHandler(async (req, res) => {
+  const statistic = await getStatisticJobAndApplication();
+  res.send(statistic);
+});
+
 const JobController = {
+  getJobStatistic,
   getAll,
   getById,
   getBySearchAndFilter,

@@ -14,6 +14,8 @@ adminRouter.use(jwtCheck);
 adminRouter.use(checkRole(["admin", "superadmin"]));
 adminRouter.use(checkUser);
 
+adminRouter.get("/statistic/user", UserController.getUserStatistic);
+adminRouter.get("/statistic/job", JobController.getJobStatistic);
 adminRouter.get(
   "/users",
   checkQuery(["search", "roles", "currentPage", "pageSize"]),
@@ -51,6 +53,11 @@ adminRouter.get(
 adminRouter.put("/jobs/remove", JobController.removeJobByAdmin);
 
 adminRouter.post("/create", jwtCheck, admin.createAdmin);
-adminRouter.post("/update", uploadFile.single("avatar"), jwtCheck, admin.updateAdmin);
+adminRouter.post(
+  "/update",
+  uploadFile.single("avatar"),
+  jwtCheck,
+  admin.updateAdmin
+);
 
 export default adminRouter;

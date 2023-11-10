@@ -13,11 +13,8 @@ import { calculatePagination } from "../../utils/paginationUtils.js";
 import { getUserById } from "./users.js";
 import { roleGetById } from "./roles.js";
 import mongoose from "mongoose";
-<<<<<<< HEAD
-
-=======
 import { sendMail } from "../Mail/mail.js";
->>>>>>> 5be456f2f9236d8e16e963266f83b883320bcc16
+
 export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
     query;
@@ -72,8 +69,6 @@ export const getActiveJobByQuery = async (query) => {
     .sort({ [sortFieldValue]: sortByValue })
     .limit(pageSize)
     .skip(offset);
-
-    console.log(jobs, 73);
 
   const creators = await RecruiterModel.find({
     userId: { $in: jobs.map((job) => job.creator) },
@@ -442,4 +437,35 @@ export const removeJobAndAddDescription = async (data) => {
   };
 
   return resInfo;
+};
+
+export const getStatisticJobAndApplication = async () => {
+  let jobStatistic = [];
+  let applicationStatistic = [];
+
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() - i);
+
+    const jobCount = await JobModel.countDocuments({
+      createdAt: {
+        $gte: date,
+        $lt: new Date(date.getTime() + 24 * 60 * 60 * 1000),
+      },
+    });
+    jobStatistic = [jobCount, ...jobStatistic];
+
+    const applicationCount = await ApplicationModel.countDocuments({
+      createdAt: {
+        $gte: date,
+        $lt: new Date(date.getTime() + 24 * 60 * 60 * 1000),
+      },
+    });
+    applicationStatistic = [applicationCount, ...applicationStatistic];
+  }
+
+  return { jobStatistic, applicationStatistic };
 };

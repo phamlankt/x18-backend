@@ -7,6 +7,8 @@ import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
 import { handleSocketEvents } from "./controllers/socket.js";
+import cron from "node-cron";
+import { checkJobStatus } from "./services/bot/checkJobStatus.js";
 
 const app = express();
 const PORT = 3001;
@@ -25,6 +27,10 @@ const corsOptions = {
 
 // 1. Create connection to database
 connectToDatabase();
+
+cron.schedule("0 0 0 * * *", () => {
+  checkJobStatus();
+});
 
 // 2. Global middlewares
 app.use(express.json());
