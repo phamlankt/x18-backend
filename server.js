@@ -4,6 +4,10 @@ import router from "./routes/index.js";
 import { connectToDatabase } from "./globals/mongodb.js";
 import { errorHandlerMiddleware } from "./middlewares/error.middleware.js";
 import cors from "cors";
+import http from "http";
+import { Server } from "socket.io";
+import { handleSocketEvents } from "./controllers/socket.js";
+
 import cron from "node-cron";
 import { checkJobStatus } from "./services/bot/checkJobStatus.js";
 
@@ -39,6 +43,13 @@ app.use("/api/v1", router);
 // 4. Error handling
 app.use(errorHandlerMiddleware);
 
-app.listen(PORT, () => {
-  console.log(`Server is running at PORT ${PORT}`);
+//5. Integrate a socket server
+const httpServer = http.createServer(app);
+const io = new Server(httpServer);
+
+io.on("connection", (socket) => {
+  handleSocketEvents(io, socket);
 });
+
+const handleListen = () => console.log(`Server is running at port ${PORT}`);
+httpServer.listen(PORT, handleListen);

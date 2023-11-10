@@ -247,6 +247,7 @@ const updatStatusByRecruiter = asyncHandler(async (req, res) => {
   }
 });
 
+
 const ApplicationController = {
   getAll,
   getOfJobId,

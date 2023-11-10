@@ -13,7 +13,11 @@ import { calculatePagination } from "../../utils/paginationUtils.js";
 import { getUserById } from "./users.js";
 import { roleGetById } from "./roles.js";
 import mongoose from "mongoose";
+<<<<<<< HEAD
+
+=======
 import { sendMail } from "../Mail/mail.js";
+>>>>>>> 5be456f2f9236d8e16e963266f83b883320bcc16
 export const getActiveJobByQuery = async (query) => {
   let { search, sectors, sortBy, sortField, currentPage, pageSize, location } =
     query;
@@ -68,6 +72,8 @@ export const getActiveJobByQuery = async (query) => {
     .sort({ [sortFieldValue]: sortByValue })
     .limit(pageSize)
     .skip(offset);
+
+    console.log(jobs, 73);
 
   const creators = await RecruiterModel.find({
     userId: { $in: jobs.map((job) => job.creator) },
