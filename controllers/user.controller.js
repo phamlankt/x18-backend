@@ -25,7 +25,8 @@ export const profileUpdateById = async (req, res) => {
     await userUpdateById(data);
     if (roleName === "recruiter") await recruiterUpdateByUserId(data);
     else if (roleName === "applicant") await applicantUpdateByUserId(data);
-    else if (roleName === "admin") await adminUpdateByUserId(data);
+    else if (roleName === "admin" || roleName === "superadmin")
+      await adminUpdateByUserId(data);
     const currentUser = await userGetAllDetailsById(id);
     res.send(
       RESPONSE(

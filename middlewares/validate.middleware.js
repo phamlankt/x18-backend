@@ -20,7 +20,8 @@ export const validationProfileMdw = () => async (req, res, next) => {
       ? recruiterProfileSchema
       : roleName === "applicant"
       ? applicantProfileSchema
-      : roleName === "admin" && adminProfileSchema;
+      : (roleName === "admin" || roleName === "superadmin") &&
+        adminProfileSchema;
 
   try {
     await schema.validate(req.body);
