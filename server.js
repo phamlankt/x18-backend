@@ -34,12 +34,12 @@ cron.schedule("0 0 0 * * *", () => {
 
 // 2. Global middlewares
 app.use(express.json());
-// app.use(cors("*"));
-app.use(cors({
-  origin: "http://localhost:3000"
-}
-))
-app.options('*', cors())
+app.use(cors("*"));
+// app.use(cors({
+//   origin: "http://localhost:3000"
+// }
+// ))
+// app.options('*', cors())
 
 // 3. Routing
 app.use("/api/v1", router);
