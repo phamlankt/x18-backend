@@ -34,7 +34,25 @@ cron.schedule("0 0 0 * * *", () => {
 
 // 2. Global middlewares
 app.use(express.json());
-app.use(cors("*"));
+// app.use(cors("*"));
+app.use(function (req, res, next) {
+  // res.header("Access-Control-Allow-Origin", "*");
+  const allowedOrigins = [
+    "http://localhost:3000",
+    process.env.BASE_URL_FRONTEND,
+  ];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header("Access-Control-Allow-credentials", true);
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, UPDATE");
+  next();
+});
 
 // 3. Routing
 app.use("/api/v1", router);
