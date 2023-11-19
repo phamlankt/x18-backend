@@ -34,6 +34,10 @@ const JobSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    hiredCount: {
+      type: Number,
+      required: false,
+    },
     description: {
       type: String,
       required: true,

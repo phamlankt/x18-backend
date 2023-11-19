@@ -1,7 +1,5 @@
 import { MongoFields } from "../../globals/fields/mongo.js";
-import {
-  ApplicantModel,
-} from "../../globals/mongodb.js";
+import { ApplicantModel } from "../../globals/mongodb.js";
 
 export const applicantCreate = async (data) => {
   const {
@@ -42,6 +40,7 @@ export const applicantUpdateByUserId = async (data) => {
     sectors,
     description,
     avatarUrl,
+    documents,
   } = data;
 
   const existingUser = await applicantGetByUserId(userId);
@@ -80,7 +79,23 @@ export const applicantUpdateByUserId = async (data) => {
     existingUser.avatarUrl = avatarUrl;
   }
 
+  if (documents) {
+    if (existingUser.documents) {
+      const existingDocuments = existingUser.documents;
+      const filteredExistingDocuments = existingDocuments.filter(
+        (docu) => !containDuplicateDocument(docu, documents)
+      );
+      existingUser.documents = [...filteredExistingDocuments, ...documents];
+    } else existingUser.documents = documents;
+  }
+
   return await existingUser.save();
+};
+
+const containDuplicateDocument = (docu, newDocuList) => {
+  const filterDocuList = newDocuList.filter((dc) => dc.name === docu.name);
+  if (filterDocuList.length > 0) return true;
+  else return false;
 };
 
 export const applicantGetByUserId = async (userId) => {

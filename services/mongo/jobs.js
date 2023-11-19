@@ -246,6 +246,7 @@ export const createJob = async ({ data, userId }) => {
   data.creator = userId;
   data.deadline = new Date(data.deadline);
   data.amount = Number(data.amount) || 0;
+  data.hiredCount = Number(data.hiredCount) || 0;
   data.status = "open";
 
   const jobDoc = new JobModel(data);
@@ -269,6 +270,7 @@ export const removeJobById = async (data) => {
 };
 
 export const updateJobById = async ({ jobId, updateData, userId }) => {
+  console.log("{ jobId, updateData, userId }",{ jobId, updateData, userId })
   const user = await getUserById(userId);
   if (!user) throw new Error("User does not exist!");
   if (user.status !== "active") throw new Error("User is inactive!");
@@ -295,6 +297,9 @@ export const updateJobById = async ({ jobId, updateData, userId }) => {
 
   if (updateData.deadline) {
     updateData.deadline = new Date(updateData.deadline);
+  }
+  if (updateData.hiredCount) {
+    existingJob.hiredCount = updateData.hiredCount;
   }
 
   ///chưa cập nhập được, vì existingJob.hasOwnProperty(prop) luôn false

@@ -11,10 +11,13 @@ import {
 } from "../services/mongo/application.js";
 import { RESPONSE } from "../globals/api.js";
 import { ResponseFields } from "../globals/fields/response.js";
-import { applicantCreate } from "../services/mongo/applicant.js";
+import {
+  applicantCreate,
+  applicantUpdateByUserId,
+} from "../services/mongo/applicant.js";
 import { getUserById } from "../services/mongo/users.js";
 import { roleGetById } from "../services/mongo/roles.js";
-import { getJobById } from "../services/mongo/jobs.js";
+import { getJobById, updateJobById } from "../services/mongo/jobs.js";
 import { MongoFields } from "../globals/fields/mongo.js";
 import { uploadStream } from "../middlewares/multer.js";
 import fs from "fs";
@@ -91,6 +94,7 @@ const create = asyncHandler(async (req, res) => {
       throw new Error("Missing required fields");
     const { id } = req.users;
 
+    // const user = await getUserById(id);
     const user = await getUserById(id);
     if (!user) throw new Error("User does not exist!");
     if (user.status !== "active") throw new Error("User is inactive!");
@@ -102,6 +106,11 @@ const create = asyncHandler(async (req, res) => {
 
     const job = await getJobById(jobId);
     if (!job) throw new Error("Job does not exist");
+    if (
+      job.hiredCount === job.amount ||
+      job.deadline.getTime() < new Date().getTime()
+    )
+      throw new Error("This job does not receive further application!");
 
     const application = await applicationGetByApplicantIdAndJobId(id, jobId);
     if (application) throw new Error("User applied to this job already!");
@@ -115,7 +124,9 @@ const create = asyncHandler(async (req, res) => {
       });
       const responseDocu = values.map((value, index) => {
         return {
-          name: documentNames[index],
+          name: Array.isArray(documentNames)
+            ? documentNames[index]
+            : documentNames,
           path: value.url,
           fileName: value.original_filename,
         };
@@ -127,6 +138,12 @@ const create = asyncHandler(async (req, res) => {
         note,
         status: "sent",
       });
+
+      await applicantUpdateByUserId({
+        userId: id,
+        documents: responseDocu,
+      });
+
       res.send(
         RESPONSE(
           {
@@ -213,6 +230,10 @@ const updatStatusByRecruiter = asyncHandler(async (req, res) => {
     if (!existingJob) throw new Error("Job does not exist");
     if (existingJob.creator !== id)
       throw new Error("Job is not created by this user");
+    if (status === "confirmed") {
+      if (existingJob.hiredCount === existingJob.amount)
+        throw new Error("Enough people has been recruited for this job!");
+    }
 
     const existingApplication = await getApplicationtById(applicationId);
     if (!existingApplication) throw new Error("Application does not exist");
@@ -221,16 +242,26 @@ const updatStatusByRecruiter = asyncHandler(async (req, res) => {
     if (existingApplication.status !== "sent")
       throw new Error("Application is not in sent state!");
 
-    const rejectedApplication = await updateApplicationStatusById({
+    const updatedApplication = await updateApplicationStatusById({
       applicationId: applicationId,
       status: status,
     });
+
+    if (status === "confirmed") {
+      let hiredCount = existingJob.hiredCount;
+      await updateJobById({
+        jobId: jobId,
+        updateData: { ...existingJob, hiredCount: ++hiredCount },
+        userId: id,
+      });
+    }
+
     res.send(
       RESPONSE(
         {
-          [ResponseFields.applicationInfo]: rejectedApplication,
+          [ResponseFields.applicationInfo]: updatedApplication,
         },
-        "Change application status successfully"
+        `Application is ${status} status successfully!`
       )
     );
   } catch (e) {
@@ -246,7 +277,6 @@ const updatStatusByRecruiter = asyncHandler(async (req, res) => {
       );
   }
 });
-
 
 const ApplicationController = {
   getAll,

@@ -111,6 +111,7 @@ export const userGetAllDetailsById = async (id) => {
       sectors,
       description,
       avatarUrl,
+      documents
     } = currentApplicant;
     currentUser = {
       ...currentUser[MongoFields.doc],
@@ -123,6 +124,7 @@ export const userGetAllDetailsById = async (id) => {
       sectors,
       description,
       avatarUrl,
+      documents
     };
   } else if (currentRole.name.includes("admin")) {
     const currentAdmin = await adminGetByUserId(id);

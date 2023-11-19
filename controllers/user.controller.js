@@ -19,7 +19,6 @@ import expressAsyncHandler from "express-async-handler";
 
 export const profileUpdateById = async (req, res) => {
   const data = req.body;
-  console.log("data", data);
   const { id, roleName } = req.body;
   try {
     await userUpdateById(data);

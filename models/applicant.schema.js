@@ -39,6 +39,10 @@ const ApplicantSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    documents: {
+      type: Array,
+      required: false,
+    },
   },
   {
     timestamps: true,

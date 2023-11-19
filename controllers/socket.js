@@ -16,7 +16,6 @@ const getUser = (id) => {
   return onlineUsers.find((user) => user.id === id);
 };
 const notifiyApplicationStatus = (io, data) => {
-  // console.log("data", data);
   const { jobTitle } = data;
   const { recruiter, applicant, status } = data;
   if (status === "confirmed" || status === "rejected") {
