@@ -115,7 +115,9 @@ const create = asyncHandler(async (req, res) => {
       });
       const responseDocu = values.map((value, index) => {
         return {
-          name: documentNames[index],
+          name: Array.isArray(documentNames)
+            ? documentNames[index]
+            : documentNames,
           path: value.url,
           fileName: value.original_filename,
         };
@@ -246,7 +248,6 @@ const updatStatusByRecruiter = asyncHandler(async (req, res) => {
       );
   }
 });
-
 
 const ApplicationController = {
   getAll,
