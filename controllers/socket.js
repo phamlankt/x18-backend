@@ -4,8 +4,7 @@ import { getUserById } from "../services/mongo/users.js";
 let onlineUsers = [];
 
 const addNewUser = (id, email, socketId) => {
-  !onlineUsers.some((user) => user.email === email) &&
-    onlineUsers.push({ id, email, socketId });
+  onlineUsers.push({ id, email, socketId });
 };
 
 const removeUser = (socketId) => {
@@ -13,14 +12,13 @@ const removeUser = (socketId) => {
 };
 
 const getUser = (id) => {
-  return onlineUsers.find((user) => user.id === id);
+  return onlineUsers.filter((user) => user.id === id);
 };
 const notifiyApplicationStatus = (io, data) => {
-  // console.log("data", data);
   const { jobTitle } = data;
   const { recruiter, applicant, status } = data;
   if (status === "confirmed" || status === "rejected") {
-    const applicantOnline = getUser(applicant);
+    const applicantsOnline = getUser(applicant);
 
     //save notification to DB
     getUserById(applicant).then((existingApplicant) => {
@@ -32,14 +30,18 @@ const notifiyApplicationStatus = (io, data) => {
       };
       createNotification(savedData).then((result) => {
         // check if user is online then send notification
-        applicantOnline &&
-          io
-            .to(applicantOnline.socketId)
-            .emit("getJobNotification", { ...result._doc, jobTitle });
+        if (applicantsOnline.length > 0) {
+          applicantsOnline.map((applicantOnline) => {
+            io.to(applicantOnline.socketId).emit("getJobNotification", {
+              ...result._doc,
+              jobTitle,
+            });
+          });
+        }
       });
     });
   } else if (status === "sent" || status === "cancelled") {
-    const recruiterOnline = getUser(recruiter);
+    const recruitersOnline = getUser(recruiter);
 
     //save notification to DB
     getUserById(recruiter).then((existingRecruiter) => {
@@ -50,22 +52,22 @@ const notifiyApplicationStatus = (io, data) => {
         read: false,
       };
 
-      createNotification(savedData).then(
-        (result) =>{
-          // check if user is online then send notification
-          recruiterOnline &&
-          io
-            .to(recruiterOnline.socketId)
-            .emit("getJobNotification", { ...result._doc, jobTitle })}
-      );
+      createNotification(savedData).then((result) => {
+        // check if user is online then send notification
+        if (recruitersOnline.length > 0)
+          recruitersOnline.map((recruiterOnline) => {
+            io.to(recruiterOnline.socketId).emit("getJobNotification", {
+              ...result._doc,
+              jobTitle,
+            });
+          });
+      });
     });
   }
 };
 
 const handleSocketEvents = (io, socket) => {
-  // console.log('someone joined!')
   socket.on("newUser", ({ email, id }) => {
-    console.log("email", email, id, socket.id);
     addNewUser(id, email, socket.id);
     console.log("onlineUsers", onlineUsers);
   });
@@ -75,9 +77,8 @@ const handleSocketEvents = (io, socket) => {
   );
 
   socket.on("disconnect", () => {
-    removeUser(socket.socketId);
-    console.log("user disconnected");
-    console.log("onlineUsers", onlineUsers);
+    removeUser(socket.id);
+    console.log("onlineUsers after disconnected", onlineUsers);
   });
 };
 

@@ -37,7 +37,7 @@ export const applicantProfileSchema = Yup.object().shape({
       return false;
     })
   ),
-  description: Yup.string().required("Company description is required"),
+  description: Yup.string().required("Self description is required"),
 });
 
 export const adminProfileSchema = Yup.object().shape({
