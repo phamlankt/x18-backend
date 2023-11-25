@@ -14,22 +14,14 @@ export const adminCreate = async (data) => {
 };
 
 export const adminUpdateByUserId = async (data) => {
-  const { userId, fullName, phoneNumber, avatarUrl } = data;
+  const { userId } = data;
+  delete data.id;
 
   const existingUser = await adminGetByUserId(userId);
-
   if (!existingUser) throw new Error("User not already exist");
 
-  if (fullName) {
-    existingUser.fullName = fullName;
-  }
-
-  if (phoneNumber) {
-    existingUser.phoneNumber = phoneNumber;
-  }
-
-  if (avatarUrl) {
-    existingUser.avatarUrl = avatarUrl;
+  for (const prop in data) {
+    existingUser[prop] = data[prop];
   }
 
   return await existingUser.save();

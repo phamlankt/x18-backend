@@ -12,7 +12,7 @@ userRouter.put(
   validationProfileMdw(),
   UserController.profileUpdateById
 );
-userRouter.put("/changePassword", UserController.userChangePassword);
+userRouter.put("/changePassword", jwtCheck, UserController.userChangePassword);
 userRouter.put("/resetPassword", UserController.userResetPassword);
 userRouter.post(
   "/upload-avatar",

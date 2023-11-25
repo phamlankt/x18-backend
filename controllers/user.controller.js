@@ -71,7 +71,6 @@ export const userChangePassword = async (req, res) => {
 
 export const userResetPassword = async (req, res) => {
   const { token, password } = req.body;
-
   try {
     if (!token || !password) throw new Error("Missing required fields");
     // decrypt token, get email from the token and check if that email has is_resetting_password=true
@@ -109,7 +108,7 @@ export const userResetPassword = async (req, res) => {
   } catch (e) {
     if (e.message === "jwt expired") {
       return res.status(403).json({
-        message: "Token is expired",
+        error: "Token is expired",
       });
     }
     res.status(400).send(RESPONSE([], "Unsuccessful", e.errors, e.message));

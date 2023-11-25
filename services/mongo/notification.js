@@ -1,4 +1,3 @@
-import expressAsyncHandler from "express-async-handler";
 import { MongoFields } from "../../globals/fields/mongo.js";
 import { NotificationModel } from "../../globals/mongodb.js";
 import { getJobById } from "./jobs.js";

@@ -32,7 +32,7 @@ export const validationProfileMdw = () => async (req, res, next) => {
 };
 
 export const parseFormDataToBody = (req, res, next) => {
-  const body = JSON.parse(JSON.stringify(req.body)); // req.body = [Object: null prototype] { title: 'product' }
+  const body = JSON.parse(JSON.stringify(req.body)); 
   if (body) {
     req.body = body;
     next();
