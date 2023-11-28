@@ -27,7 +27,7 @@ export const userCreate = async (data, isHashPassword = true) => {
 };
 
 export const userUpdateById = async (data) => {
-  const { id, email, password, is_password_resetting, status, roleId } = data;
+  const { id, password } = data;
 
   const existingUser = await getUserById(id);
 
@@ -35,25 +35,12 @@ export const userUpdateById = async (data) => {
 
   if (password) {
     const hashedPassword = await hashPassWord(password);
-    existingUser.password = hashedPassword;
+    data.password = hashedPassword;
   }
-
-  if (email) {
-    existingUser.email = email;
+  delete data.id;
+  for (const prop in data) {
+    existingUser[prop] = data[prop];
   }
-
-  if (is_password_resetting) {
-    existingUser.is_password_resetting = true;
-  } else existingUser.is_password_resetting = false;
-
-  if (status) {
-    existingUser.status = status;
-  }
-
-  if (roleId) {
-    existingUser.roleId = roleId;
-  }
-
   return await existingUser.save();
 };
 

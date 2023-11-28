@@ -15,10 +15,10 @@ export const send = async (req, res) => {
     },
   });
   const { email } = req.body;
+  if (!email) throw new Error("Email does not exist!");
   const requestedUser = await userGetByEmail(email);
   if (!requestedUser)
-    res.status(400).send(RESPONSE([], "Email does not exist!"));
-  // throw new Error("Email does not exist!");
+    res.status(400).send(RESPONSE([], "User does not exist!"));
   else {
     try {
       // send a link to resetpage with token as params

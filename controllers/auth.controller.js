@@ -33,9 +33,9 @@ const login = asyncHandler(async (req, res) => {
     if (!isMatchPassword) throw new Error("Email or password is not correct!");
 
     // Create JWT Token & Response to client
-    const roleObj = (await roleGetById(existingUser.roleId))
-    const roleName = roleObj.name
-    
+    const roleObj = await roleGetById(existingUser.roleId);
+    const roleName = roleObj.name;
+
     const jwtPayload = {
       id: existingUser[MongoFields.id],
       [MongoFields.email]: existingUser[MongoFields.email],
@@ -71,6 +71,7 @@ const register = async (req, res) => {
 
     // Get roleid
     const r = await roleGetByName(role);
+    if (!r) throw new Error("Role does not exist!");
     const roleId = r[MongoFields.id];
 
     //  Create new register object
